@@ -12,7 +12,7 @@ Use the NETLOGO environment variable to tell the Makefile where to find the NetL
 
     NETLOGO=/Applications/NetLogo\\\ 5.0beta2 make raytracing.zip
 
-If compilation succeeds, `raytracing.jar` and `raytracing.zip` (containing everything needed to distribute the extension)
+If compilation succeeds, `raytracing.jar` and `raytracing.zip` (containing everything needed to distribute the extension) should be created.
 
 
 ## Credits
