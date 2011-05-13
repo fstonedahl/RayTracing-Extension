@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<title>
+      NetLogo User Manual: RayTracing Extension
+    </title>
+    <link rel="stylesheet" href="netlogo.css" type="text/css">
+    <style type="text/css">
+p { margin-left: 1.5em ; }
+    h3 { font-size: 115% ; }
+    h4 { font-size: 100% ; margin-left: 1.5em ; background: white ; }
+    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+  <h1>
+      RayTracing Extension
+    </h1>
+    <p>
+        The RayTracing extension provides an interface with the popular open-source <a href="http://www.povray.org/">POV-Ray</a> ray tracing rendering engine.
+        This allows Netlogo users to create more elaborate visualizations of their models, including shadows, reflection, refraction,
+        texture mapping, and more.  
+        It also supports creating images with arbitrarily high resolution, which is especially useful for creating print-quality graphics.
+        The RayTracing extension can be used both in Netlogo 2D and Netlogo 3D, although it is generally more effective when using NetLogo 3D.
+    <h2>
+      Getting set up
+    </h2>
+    <p> First, you need to (separately) install <a href="http://www.povray.org/">POV-Ray</a> on your computer.  
+POV-Ray runs on Windows, Mac, and Linux (although support for modern Intel-baesd Macs seems to somewhat sketchy at present, and this extension has only been (lightly) tested on Windows and Linux.
+    <h2>
+      How to use
+    </h2>
+    <p>
+     To use the Raytracing Extension in your model, add a line to the top of your procedures tab:
+    <pre>
+extensions [raytracing]
+</pre>
+    <p>
+    Then issue the command:
+<pre>
+  raytracing:render "output_file_name"  9
+</pre>
+    <p>
+For more information about rendering primitive, see the <a href="#raytracing:render">raytracing:render</a> documentation below.
+    <p>
+    For more information on using Netlogo extensions, see the <a href="extensions.html">Extensions Guide</a>.
+    <h2>
+      RayTracing extension Primitives
+    </h2>
+    <h3>
+      Light
+    </h3>
+    <p>
+      <a href="#raytracing:add-light">raytracing:add-light</a> 
+      <a href="#raytracing:clear-lights">raytracing:clear-lights</a> 
+    <h3>
+      Surfaces and textures
+    </h3>
+    <p>
+      <a href="#raytracing:set-reflection">raytracing:set-reflection</a> 
+      <a href="#raytracing:set-refraction">raytracing:set-refraction</a> 
+      <a href="#raytracing:set-highlight">raytracing:set-texture</a> 
+      <a href="#raytracing:set-image">raytracing:set-image</a> 
+    <h3>
+      Rendering
+    </h3>
+    <p>
+      <a href="#raytracing:set-resolution">raytracing:set-resolution</a> 
+      <a href="#raytracing:set-background">raytracing:set-background</a> 
+      <a href="#raytracing:anti-aliasing">raytracing:anti-aliasing</a> 
+      <a href="#raytracing:set-background-image">raytracing:set-background-image</a> 
+      <a href="#raytracing:render">raytracing:render</a> 
+
+    <h2>
+      Light
+    </h2>
+    <div class="dict_entry">
+      <h3>
+        <a name="raytracing:add-light" id=
+        "raytracing:add-light">raytracing:add-light</a>
+      </h3>
+      <h4>
+        raytracing:add-light <i>xcor</i> <i>ycor</i> <i>zcor</i> <i>color</i>
+      </h4>
+      <p>
+        add a new light to the scene with specified coordinate and color, which can be either Netlogo or RGB color.
+      </div>
+    <div class="dict_entry">
+      <h3>
+        <a name="raytracing:clear-lights" id=
+        "raytracing:clear-lights">raytracing:clear-lights</a>
+      </h3>
+      <h4>
+        raytracing:clear-lights
+      </h4>
+      <p>
+        delete all lights in the scene
+      </div>
+    <h2>
+      Surfaces and textures
+    </h2>
+    <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-reflectivity" id="raytracing:set-reflectivity">raytracing:set-reflectivity</a>
+      </h3>
+      <h4>
+        raytracing:set-reflectivity <i>reflectivity-rate</i>
+      </h4>
+      <p>
+        set the reflectivity rate of individual agents.
+     <pre>
+        example: ask turtle n set [raytracing:set-reflectivity reflectivity-rate]
+      </pre>
+      </div>
+    <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-refractivity" id="raytracing:set-refractivity">raytracing:set-refractivity</a>
+      </h3>
+      <h4>
+        raytracing:set-refractivity <i>refractivity_rate</i>
+      </h4>
+      <p>
+        set the refractivity rate of individual agents.
+      <pre>
+        example: ask turtle n set [raytracing:set-refractivity refractivity-rate]
+      </pre>
+      </div>
+    <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-highlight" id=
+        "raytracing:set-highlight">raytracing:set-highlight</a>
+      </h3>
+      <h4>
+        raytracing:set-highlight <i>amount</i> <i>size</i>
+      </h4>
+      <p>
+        set the highlight on individual agents with specified amount (between 0 and 1) and size (between 0 and 250 - 40 is a good default).
+      <pre>
+        example: ask turtle n set [raytracing:set-highlight amount size]
+      </pre>
+      </div>
+    <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-texture" id="raytracing:set-texture">raytracing:set-texture</a>
+      </h3>
+      <h4>
+        raytracing:set-texture <i>texture_name</i>
+      </h4>
+      <p>
+        set the texture mapping on individual agents.
+      <pre>
+        example: ask turtle n set [raytracing:set-texture texture_name]
+      </pre>
+      </div>
+    <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-image" id="raytracing:set-image">raytracing:set-image</a>
+      </h3>
+      <h4>
+        raytracing:set-image <i>image_name</i>
+      </h4>
+      <p>
+        set the image mapping on individual agents.
+      <pre>
+        example: ask turtle n set [raytracing:set-image image_name]
+      </pre>
+      </div>
+      <h2>
+      Rendering
+      </h2>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-resolution" id="raytracing:set-resolution">raytracing:set-resolution</a>
+      </h3>
+      <h4>
+        raytracing:set-resolution <i>x_pixel</i> <i>y_pixel</i>
+      </h4>
+      <p>
+        set the resolution of the output image
+      </div>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-background" id="raytracing:set-background">raytracing:set-background</a>
+      </h3>
+      <h4>
+        raytracing:set-background <i>color</i>
+      </h4>
+      <p>
+        set the background color of the output image. The color can be either Netlogo or RGB color.
+      </div>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:anti_aliasing" id="raytracing:anti_aliasing">raytracing:anti_aliasing</a>
+      </h3>
+      <h4>
+        raytracing:anti_aliasing <i>level</i>
+      </h4>
+      <p>
+        set the anti-aliasing level of the rendering process.
+      </div>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-background-image" id="raytracing:set-background-image">raytracing:set-background-image</a>
+      </h3>
+      <h4>
+        raytracing:set-background-image <i>image_name</i>
+      </h4>
+      <p>
+        set the background image of the output image.
+      </div>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:render" id="raytracing:render">raytracing:render</a>
+      </h3>
+      <h4>
+        raytracing:render <i>output_file_name</i> <i>rendering_level</i>
+      </h4>
+      <p>
+        render the scene with the specified output file name and rendering level.
+      </div>
+ 
+    <h2>
+      Credits:
+    </h2>
+    <p>
+	The idea for the raytracing extension was conceived by <a href="http://forrest.stonedahl.com/">Forrest Stonedahl</a>, and the first version was implemented in an independent study course project by Rumou Duan at Northwestern University, under the supervision of Forrest Stonedahl and Uri Wilensky.  If you would like to contribute to this project, the <a href="https://github.com/fstonedahl/RayTracing-Extension">open source code</a> is available from GitHub, and patches/developers are most welcome.  (Contact <a href="mailto:forrest@u.northwestern.edu">forrest@u.northwestern.edu</a> for more information.)

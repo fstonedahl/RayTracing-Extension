@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Extension-Name: povray
+Class-Manager: org.nlogo.extensions.raytracing.RayTracingExtension
+NetLogo-Extension-API-Version: 5.0
