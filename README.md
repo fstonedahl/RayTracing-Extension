@@ -4,21 +4,22 @@ This package contains the NetLogo raytracing extension, which provides an interf
 
 ## Using
 
-See the documentation in the included file povray.html.
+See the documentation in the included file raytracing.html.
 
 ## Building
 
-Use the NETLOGO environment variable to tell the Makefile which NetLogo.jar to compile against.  For example:
+Use the NETLOGO environment variable to tell the Makefile where to find the NetLogo.jar to compile against.  For example:
 
-    NETLOGO=/Applications/NetLogo\\\ 5.0beta2 make
+    NETLOGO=/Applications/NetLogo\\\ 5.0beta2 make raytracing.zip
 
-If compilation succeeds, `povray.jar` will be created.
+If compilation succeeds, `raytracing.jar' and `raytracing.zip` (containing everything needed to distribute the extension)
+
 
 ## Credits
 
 The idea for the raytracing extension was conceived by Forrest Stonedahl, and the first version was implemented in an independent study course project by Rumou Duan at Northwestern University, under the supervision of Forrest Stonedahl and Uri Wilensky.
 
-The povray extension makes use of the POV-Ray rendering engine, which must be downloaded and installed separately (see http://www.povray.org/ )
+The raytracing extension makes use of the POV-Ray rendering engine, which must be downloaded and installed separately (see http://www.povray.org/ )
 
 ## Terms of Use
 
