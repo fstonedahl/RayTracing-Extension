@@ -82,10 +82,10 @@ public class RayTracingExtension extends DefaultClassManager {
     private static HashMap<Agent, String> imageMap = new HashMap<Agent, String>();
     private static Integer resolution_width = new Integer(800);
     private static Integer resolution_height = new Integer(600);
-    private static Double anti_aliasing = new Double(0.3);
-    private static Double background_red = new Double(0.0);
-    private static Double background_green = new Double(0.0);
-    private static Double background_blue = new Double(0.0);
+    private static double anti_aliasing = 0.3;
+    private static double background_red = 0.0;
+    private static double background_green = 0.0;
+    private static double background_blue = 0.0;
     private static String background_image = null;
 
 	@Override
@@ -666,14 +666,14 @@ public class RayTracingExtension extends DefaultClassManager {
                     quality_string += 9;
 
                     povrayProcessBuilder = new ProcessBuilder( POVRAY_EXE ,
-                        "+I" + temp.getAbsolutePath(), width_string, height_string, quality_string, "+A" + anti_aliasing, "+O" + filePath + ".png") ;
+                        "+I" + temp.getAbsolutePath(), width_string, height_string, quality_string, "+A" + anti_aliasing, "-J", "+O" + filePath + ".png") ;
                 }
                 else if(quality >= 11)
                 {
                     quality_string += 9;
 
                     povrayProcessBuilder = new ProcessBuilder( POVRAY_EXE ,
-							       "+I" + temp.getAbsolutePath(), width_string, height_string, quality_string, "+A" + anti_aliasing, "+J", ((quality==12)?"-D":"+D") , "+O" + filePath + ".png") ;
+							       "+I" + temp.getAbsolutePath(), width_string, height_string, quality_string, "+A" + anti_aliasing, "+J", ((quality>=12)?"+R4":"+R3") , "+O" + filePath + ".png") ;
                 }
                 else
                 {

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
 "http://www.w3.org/TR/html4/strict.dtd">
 <title>
-      NetLogo User Manual: RayTracing Extension
+      RayTracing Extension User Manual
     </title>
     <link rel="stylesheet" href="netlogo.css" type="text/css">
     <style type="text/css">
@@ -24,6 +24,7 @@ p { margin-left: 1.5em ; }
     </h2>
     <p> First, you need to (separately) install <a href="http://www.povray.org/">POV-Ray</a> on your computer.  
 POV-Ray runs on Windows, Mac, and Linux (although support for modern Intel-baesd Macs seems to somewhat sketchy at present, and this extension has only been (lightly) tested on Windows and Linux.
+	<p> Second, you need to edit the file <i>raytracing.config</i>, which is in the raytracing extension folder, and set the correct path to your installed POV-Ray program. 
     <h2>
       How to use
     </h2>
@@ -33,9 +34,9 @@ POV-Ray runs on Windows, Mac, and Linux (although support for modern Intel-baesd
 extensions [raytracing]
 </pre>
     <p>
-    Then issue the command:
+    For the most basic usage, choose an appropriate perspective in the 3D view, and then issue the command:
 <pre>
-  raytracing:render "output_file_name"  9
+  raytracing:render "output_file_name"  10
 </pre>
     <p>
 For more information about rendering primitive, see the <a href="#raytracing:render">raytracing:render</a> documentation below.
@@ -45,11 +46,14 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       RayTracing extension Primitives
     </h2>
     <h3>
-      Light
+      Scene
     </h3>
     <p>
+      <a href="#raytracing:clear-all">raytracing:clear-all</a> 
       <a href="#raytracing:add-light">raytracing:add-light</a> 
       <a href="#raytracing:clear-lights">raytracing:clear-lights</a> 
+      <a href="#raytracing:set-background">raytracing:set-background</a> 
+      <a href="#raytracing:set-background-image">raytracing:set-background-image</a> 
     <h3>
       Surfaces and textures
     </h3>
@@ -63,14 +67,24 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
     </h3>
     <p>
       <a href="#raytracing:set-resolution">raytracing:set-resolution</a> 
-      <a href="#raytracing:set-background">raytracing:set-background</a> 
       <a href="#raytracing:anti-aliasing">raytracing:anti-aliasing</a> 
-      <a href="#raytracing:set-background-image">raytracing:set-background-image</a> 
       <a href="#raytracing:render">raytracing:render</a> 
 
     <h2>
-      Light
+      Scene
     </h2>
+    <div class="dict_entry">
+      <h3>
+        <a name="raytracing:clear-all" id=
+        "raytracing:clear-all">raytracing:clear-all</a>
+      </h3>
+      <h4>
+        raytracing:clear-all
+      </h4>
+      <p>
+        Clear all previously configured raytracing extension properties (this includes all assignments of textures and material object properties, background colors, scene lighting, antialiasing levels, output-image resolution, etc.).  It's as if you had just loaded the raytracing extension anew, and everything is fresh.  
+      <p>(Note: In contrast to NetLogo's CLEAR-ALL primitive, this command does *not* change any properties of the NetLogo world-- it only affects the special settings controlled by the raytracing extension.)
+      </div>
     <div class="dict_entry">
       <h3>
         <a name="raytracing:add-light" id=
@@ -93,6 +107,28 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       <p>
         delete all lights in the scene
       </div>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-background" id="raytracing:set-background">raytracing:set-background</a>
+      </h3>
+      <h4>
+        raytracing:set-background <i>color</i>
+      </h4>
+      <p>
+        set the background color of the 3D world. The color can be either Netlogo palette or RGB color.
+      </div>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:set-background-image" id="raytracing:set-background-image">raytracing:set-background-image</a>
+      </h3>
+      <h4>
+        raytracing:set-background-image <i>image-name</i>
+      </h4>
+      <p>
+        set the background image of the 3D world, sometimes called the "sky sphere".  (The background image you specify is warped into a spherical shape, which may result in some distortion -- thus you may have to choose/design your background images carefully.)
+      </div>
+
+      
     <h2>
       Surfaces and textures
     </h2>
@@ -162,6 +198,7 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
         example: ask turtle n set [raytracing:set-image image_name]
       </pre>
       </div>
+
       <h2>
       Rendering
       </h2>
@@ -177,16 +214,6 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       </div>
       <div class="dict_entry">
       <h3>
-        <a name="raytracing:set-background" id="raytracing:set-background">raytracing:set-background</a>
-      </h3>
-      <h4>
-        raytracing:set-background <i>color</i>
-      </h4>
-      <p>
-        set the background color of the output image. The color can be either Netlogo or RGB color.
-      </div>
-      <div class="dict_entry">
-      <h3>
         <a name="raytracing:anti_aliasing" id="raytracing:anti_aliasing">raytracing:anti_aliasing</a>
       </h3>
       <h4>
@@ -197,23 +224,13 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       </div>
       <div class="dict_entry">
       <h3>
-        <a name="raytracing:set-background-image" id="raytracing:set-background-image">raytracing:set-background-image</a>
-      </h3>
-      <h4>
-        raytracing:set-background-image <i>image_name</i>
-      </h4>
-      <p>
-        set the background image of the output image.
-      </div>
-      <div class="dict_entry">
-      <h3>
         <a name="raytracing:render" id="raytracing:render">raytracing:render</a>
       </h3>
       <h4>
-        raytracing:render <i>output_file_name</i> <i>rendering_level</i>
+        raytracing:render <i>output-file-name</i> <i>quality-level</i>
       </h4>
       <p>
-        render the scene with the specified output file name and rendering level.
+        render the scene with the specified output file name (leave off the filename extension - it will be added automatically to create <i>output-file-name.POV</i> and <i></i>output-file-name.PNG</i> ) and <i>quality-level</i> (quality-level 10 is full/normal output - lower numbers will be lower quality, but will render more quickly.  quality-levels 11 and 12 provide slightly higher quality due to jittering and additional antialiased supersampling, but should not be used for creating animations, because the random jittering may vary from frame to frame.)
       </div>
  
     <h2>
