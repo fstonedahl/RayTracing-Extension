@@ -23,3 +23,8 @@ raytracing.zip: raytracing.jar
 	cp -rp raytracing.jar README.md Makefile src manifest.txt raytracing.html raytracing.config shapes.txt raytracing
 	zip -rv raytracing.zip raytracing
 	#rm -rf raytracing
+
+clean:
+	rm raytracing.jar
+	rm raytracing.zip
+
