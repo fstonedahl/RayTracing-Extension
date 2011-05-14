@@ -23,7 +23,7 @@ p { margin-left: 1.5em ; }
       Getting set up
     </h2>
     <p> First, you need to (separately) install <a href="http://www.povray.org/">POV-Ray</a> on your computer.  
-POV-Ray runs on Windows, Mac, and Linux (although support for modern Intel-baesd Macs seems to somewhat sketchy at present, and this extension has only been (lightly) tested on Windows and Linux.
+POV-Ray runs on Windows, Mac, and Linux.  However, support for modern Intel-based Macs seems to somewhat sketchy at present, and this extension has only been (lightly) tested on Windows and Linux. 
 	<p> Second, you need to edit the file <i>raytracing.config</i>, which is in the raytracing extension folder, and set the correct path to your installed POV-Ray program. 
     <h2>
       How to use
@@ -231,6 +231,7 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       </h4>
       <p>
         render the scene with the specified output file name (leave off the filename extension - it will be added automatically to create <i>output-file-name.POV</i> and <i></i>output-file-name.PNG</i> ) and <i>quality-level</i> (quality-level 10 is full/normal output - lower numbers will be lower quality, but will render more quickly.  quality-levels 11 and 12 provide slightly higher quality due to jittering and additional antialiased supersampling, but should not be used for creating animations, because the random jittering may vary from frame to frame.)
+       <p>Note: The <i>output-file-name</i> path specified is interpreted as relative to the folder that the currently open model is saved in.  However, if the model hasn't been saved yet, the user's home folder may be used for output instead.
       </div>
  
     <h2>

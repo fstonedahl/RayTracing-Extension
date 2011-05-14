@@ -121,14 +121,14 @@ public class RayTracingExtension extends DefaultClassManager {
 			throw new ExtensionException("Failed to load shapes file: raytracing/shapes.txt");
 		}
 		try {
-			org.nlogo.api.File configFile = em.getFile("raytracing/raytracing.config");
+			org.nlogo.api.File configFile = em.getFile("raytracing/raytracing.config.txt");
 			String wholeFile = configFile.readFile();
 			java.util.Properties props = new java.util.Properties();
 			props.load(new java.io.StringReader(wholeFile));
-			POVRAY_EXE = props.getProperty("povray_executable", "povray2"); 
+			POVRAY_EXE = props.getProperty("povray_executable", "povray"); 
 		} catch (IOException ex)
 		{
-			throw new ExtensionException("Failed to load config file: raytracing/raytracing.config");
+			throw new ExtensionException("Failed to load config file: raytracing/raytracing.config.txt");
 		}
     }	
 
@@ -286,6 +286,20 @@ public class RayTracingExtension extends DefaultClassManager {
         }
         throw new IllegalStateException("unknown agent type");
     }
+
+	/* Pity Java doesn't have a built-in "join" method for strings... */
+	 static String joinStrings(Collection<?> s, String delimiter) {
+		 StringBuilder builder = new StringBuilder();
+		 Iterator iter = s.iterator();
+		 while (iter.hasNext()) {
+			 builder.append(iter.next());
+			 if (!iter.hasNext()) {
+			   break;                  
+			 }
+			 builder.append(delimiter);
+		 }
+		 return builder.toString();
+	 }
 
     public static class Render extends DefaultCommand
 	{
@@ -624,7 +638,7 @@ public class RayTracingExtension extends DefaultClassManager {
 
                 if(lights.isEmpty())
                 {
-                 sb.append(String.format("light_source{ <%f, %f, %f> color rgb <2.0, 2.0, 2.0>}\n", world.observer().oxcor(),
+                 sb.append(String.format("light_source{ <%f, %f, %f> color rgb <1.5, 1.5, 1.5>}\n", world.observer().oxcor(),
                          world.observer().oycor() , -(world.observer().ozcor())));   
                 }
                 else
@@ -643,59 +657,91 @@ public class RayTracingExtension extends DefaultClassManager {
 
                 out.close() ;
 
-//                ProcessBuilder povrayProcessBuilder = new ProcessBuilder( "C:\\Users\\rumou\\AppData\\Roaming\\POV-Ray\\v3.6\\bin\\pvengine-sse2.exe" ,
-//                        "/RENDER" , temp.getAbsolutePath() ,
-//                        "/EDIT" , temp.getAbsolutePath() ) ;
-                String width_string = "+W";
-                String height_string = "+H";
-                String quality_string = "+Q";
-                width_string += resolution_width;
-                height_string += resolution_height;
+				List<String> cmdArgs = new ArrayList<String>();
+                cmdArgs.add(POVRAY_EXE);
+                cmdArgs.add("+W"+resolution_width);
+                cmdArgs.add("+H"+resolution_height);
 
-                ProcessBuilder povrayProcessBuilder;
-
-                if(quality <= 9)
+                if(quality >= 1 && quality <= 9)
                 {
-                    quality_string += quality;
-
-                    povrayProcessBuilder = new ProcessBuilder( POVRAY_EXE ,
-                        "+I" + temp.getAbsolutePath(), width_string, height_string, quality_string, "+O" + filePath + ".png") ;
+					cmdArgs.add("+Q"+quality);
                 }
                 else if(quality == 10)
                 {
-                    quality_string += 9;
-
-                    povrayProcessBuilder = new ProcessBuilder( POVRAY_EXE ,
-                        "+I" + temp.getAbsolutePath(), width_string, height_string, quality_string, "+A" + anti_aliasing, "-J", "+O" + filePath + ".png") ;
+					cmdArgs.add("+Q9");
+					cmdArgs.add("+A"+anti_aliasing);
+					cmdArgs.add("-J");
                 }
-                else if(quality >= 11)
+                else if(quality >= 11 && quality <= 12)
                 {
-                    quality_string += 9;
-
-                    povrayProcessBuilder = new ProcessBuilder( POVRAY_EXE ,
-							       "+I" + temp.getAbsolutePath(), width_string, height_string, quality_string, "+A" + anti_aliasing, "+J", ((quality>=12)?"+R4":"+R3") , "+O" + filePath + ".png") ;
+					cmdArgs.add("+Q9");
+					cmdArgs.add("+A"+anti_aliasing);
+					cmdArgs.add("+J");
+					if (quality == 12) {
+						 cmdArgs.add("+R4"); 
+					}
                 }
                 else
                 {
-                    throw new ExtensionException("wrong quality number!");
+                    throw new ExtensionException("Quality-level out of range! (should be between 1 and 12)");
                 }
+                
+                ProcessBuilder povrayProcessBuilder;
+                if (POVRAY_EXE.indexOf("pvengine") > -1)  // WINDOWS
+                {
+					cmdArgs.add("+I'" + temp.getAbsolutePath() + "'");
+					cmdArgs.add("+O'" + filePath + ".png" + "'");
+					cmdArgs.add("/EXIT");
+					//NOTE: Instead of /EXIT, we could pass the windows-only
+					// command line args:  /RENDER xxx.pov /EDIT xxx.pov
+					// which might allow the user to leave POVRAY open, and make
+					// it easier for them to hand edit the files...
+					povrayProcessBuilder = new ProcessBuilder("cmd","/C", joinStrings(cmdArgs," ")) ;
+				}
+				else
+				{
+					cmdArgs.add("+I" + temp.getAbsolutePath());
+					cmdArgs.add("+O" + filePath + ".png");
+					//cmdArgs.add("+P"); // pause?
+					povrayProcessBuilder = new ProcessBuilder(cmdArgs) ;
+				}
                 povrayProcessBuilder.directory(temp.getParentFile());
-                System.out.println(temp.getParent());
-                System.out.println(temp.getName());
-            //    ProcessBuilder povrayProcessBuilder = new ProcessBuilder( "C:\\Users\\rumou\\AppData\\Roaming\\POV-Ray\\v3.6\\bin\\pvengine-sse2.exe" ,
-            //            "+I" + temp.getAbsolutePath(), width_string, height_string, quality_string, "+O" + filePath + ".bmp") ;
                 Process process = povrayProcessBuilder.start() ;
-                System.out.println( "Successfully launched POV-Ray" ) ;
 				process.waitFor();
-                System.out.println( "Successfully finished POV-Ray" ) ;
+
+				// This is a rather klunky way of checking for error messages, 
+				// But I tried checking the process.exitValue(), and it seemed
+				// like POV-Ray wasn't following that convention of non-zero exits.
+				java.io.BufferedReader err = new java.io.BufferedReader(new java.io.InputStreamReader(process.getErrorStream()));
+				String errorText = "";
+				String fullErrorText = "";
+				String line;
+				while ((line = err.readLine()) != null)
+				{
+					fullErrorText += line;
+					// Also, POV-Ray spews out so much output, it seems better to give
+					// the user only the brief error, rather than subject them to
+					// a massive amount of credits/text/garbage/etc.
+					if (line.toLowerCase().indexOf("error") > -1)
+					{
+						errorText += line + "\n";
+					}
+				}
+				if (errorText.toLowerCase().indexOf("error") > -1)
+				{
+					System.err.println(fullErrorText);
+					javax.swing.JOptionPane.showMessageDialog(null, errorText, "Error runinng POV-Ray", javax.swing.JOptionPane.ERROR_MESSAGE); 
+				}
 
             }
-            catch( IOException e )
-            {                                 
-                // TO DO
-                System.out.println( "Got an IOException: " + e.getMessage() ) ;
+            catch( IOException ex )
+            { 
+				throw new ExtensionException(ex);
             }
-			catch (InterruptedException ex) { ex.printStackTrace(); }
+			catch (InterruptedException ex) 
+			{
+				throw new ExtensionException(ex);
+			}
 		}					      
     }
 
