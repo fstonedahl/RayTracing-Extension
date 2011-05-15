@@ -7,10 +7,13 @@
  *  - brighten/darken all light sources in the scene?
  *  - spotlights?
  * 
- * TODO: Structural overhaul 
+ * TODO: Structural overhaul/refactoring of code, and tidy up/compress the POV-Ray code produced.
+ * TODO: Along with this:
  *    - make it so that agents that share 
  *      features get a prototype shape with all of those common
  *      features in the POV file, so editing that will edit all of them.
+ *    - hopefully separate out the shape templates from the bulky data that follows:
+ *       Generate INC file as well as POV file?
  *     "Consider the idea of archetypes -- for each breed (sheep, wolves) or object type (turtles patches), can we create a template object in the POV file that contains all of the attributes (color, size, texture) that the breed has in common? (This would make it easier to manually edit the POV file, for power users.)"
  * 
  * TODO: Get rid of any remaining debugging/println statements...
@@ -29,6 +32,8 @@
  *       so people could theoretically tinker with the source/includes to use the clock?
  * 
  * TODO: Better error handling support.
+ * 
+ * TODO: Support directed link indicators (using cones!)
  * 
  */
 
