@@ -125,12 +125,12 @@ end
  
 
 to render
-  raytracing:set-resolution 1024 768
+  raytracing:output-resolution 1024 768
   raytracing:render "test" 10
 end
 
 to make-movie
-  raytracing:set-resolution 300 200
+  raytracing:output-resolution 300 200
   ;; NOTE: If you're creating a bunch of movie frames, it's usually better
   ;; to put them in a subfolder, so create a subfolder called "frames"
   ;; and change the line below to:
