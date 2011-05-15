@@ -3,21 +3,21 @@ extensions [raytracing]
  
 to setup-scene1
   clear-all
-  raytracing:add-light -5 -5 -5 [255 255 255]
+  raytracing:add-light 0 0 10 white
   create-turtles 1 [ 
     set shape "circle"
     set heading 0
-    set color red
-    ;set alpha 128
-    setxyz 0 0 0
-    set size 5
+    set color [255 0 0 128] ; partially transparent red
+    setxyz -2 0 0
+    set size 4
   ]
   create-turtles 1 [
     set shape "circle"
     set heading 0
     set color yellow
-    setxyz 5 0 0
-    set size 5 
+    setxyz 2 0 0
+    set size 4 
+    raytracing:set-highlight 0.4 50  ; shiny (specular highlight from light source)
   ]       
      
   ask patches with [pzcor = min-pzcor ]
@@ -25,45 +25,43 @@ to setup-scene1
     ifelse (pxcor + pycor) mod 2 = 0
       [ set pcolor blue ]
       [ set pcolor gray ]
-    ;set palpha 255
   ]
   
 end
 
 
 to setup-scene2
-  ;; (for this model to work with NetLogo's new plotting features,
-  ;; __clear-all-and-reset-ticks should be replaced with clear-all at
-  ;; the beginning of your setup procedure and reset-ticks at the end
-  ;; of the procedure.)
-  __clear-all-and-reset-ticks
-  raytracing:clear-lights
-  raytracing:add-light -5 -5 15 [255 255 255]
+  clear-all
+  raytracing:add-light -5 -5 15 white
+  raytracing:add-light 5 5 15 blue
   create-turtles 1 [ 
     set shape "car"
     set heading 0
     set color red
     ;set alpha 128
     setxyz 0 0 0
+    raytracing:set-highlight 0.3 40
   ]
   create-turtles 1 [
-    set shape "triangle"
+    set shape "triangle"  ;; cone (rather oddly).
     set heading 0
     set color yellow
     setxyz 1 0 0
-  ]       
+    raytracing:set-highlight 0.5 20
+  ]        
   create-turtles 1 [
     set shape "cylinder"
     set heading 0
     set color [255 0 255 128]
     setxyz 0 1 0
+    raytracing:set-highlight 0.2 80
   ]       
   create-turtles 1 [
     set shape "square"
     set heading 0
     set color green
     setxyz 1 1 0
-    ;raytracing:set-image "world.png"
+    raytracing:set-texture "T_Stone34" 1.5
   ]       
   raytracing:set-background-image "samplesky.jpg"
   
@@ -73,32 +71,83 @@ to setup-scene2
       [ set pcolor blue + 1 ]
       [ set pcolor gray + 1 ]
     ;set palpha 255
-    raytracing:set-reflection 0.2
+    raytracing:set-reflection 0.3
+    raytracing:set-highlight 0.3 40
+  ]    
+  zoom 55
+  orbit-left 30
+  orbit-down 20
+end
+
+to setup-scene3
+  clear-all
+  crt 3 [
+   set shape "circle"
+   set size (who + 1) * 3
+   set color who * 50 + 15
+   set color lput (140 - (20 * who)) extract-rgb color
+   raytracing:set-highlight 0.3 40
+   raytracing:set-refraction 0.95
+   raytracing:set-reflection 0.1
   ]
-   
+  ask patches with [pzcor = min-pzcor ]
+  [
+    ifelse (pxcor + pycor) mod 2 = 0
+      [ set pcolor yellow + 1 ]
+      [ set pcolor gray + 1 ]
+  ]    
+  
+  raytracing:add-light 40 40 40 white
+  raytracing:add-light -40 -40 40 white
+  zoom 45
+  orbit-left 35
+  orbit-down 50
+end      
+ 
+to setup-scene4
+  clear-all  
+  crt 4 [
+   set heading 0
+   set shape item who ["circle" "triangle" "square" "cylinder"]
+   fd who * 2.5
+   bk 1.5 * 2.5
+   if (who != 3)
+   [ right 115 tilt-up 90 ]
+   set size 2
+   raytracing:set-image "gabby.jpg"
+   raytracing:set-highlight 0.2 40
+   raytracing:set-reflection 0.1
+  ] 
+  zoom 55
+  orbit-right 90
+  orbit-down 60
 end
  
 
 to render
   raytracing:set-resolution 1024 768
-  raytracing:render "test" 11
+  raytracing:render "test" 10
 end
 
 to make-movie
   raytracing:set-resolution 300 200
-  let num 1000
-  orbit-down 45
-  orbit-right 90
-  zoom 20
-  repeat 200
+  ;; NOTE: If you're creating a bunch of movie frames, it's usually better
+  ;; to put them in a subfolder, so create a subfolder called "frames"
+  ;; and change the line below to:
+  ;;   raytracing:start-movie "frames/testmovie" 10
+  raytracing:start-movie "testmovie" 10
+
+  repeat 60
   [
      orbit-left 1
-     zoom 40 / num
-     ;display
-     raytracing:render (word "movie" num) 11
-     set num num + 1
+     zoom 0.05
+     display ;;wait 0.05
+     raytracing:render-next-movie-frame
   ]
-  
+  ;; NOTE 2: All the extension does is create the movie frames for you --
+  ;;   You're on your own to turn those frames into a movie.  
+  ;;  I recommend using the free open source FFMPEG tool for this task.
+      
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -131,10 +180,10 @@ ticks
 30.0
 
 BUTTON
-79
-47
-185
-80
+65
+35
+175
+68
 NIL
 setup-scene1
 NIL
@@ -148,10 +197,10 @@ NIL
 1
 
 BUTTON
-200
-49
-269
-82
+220
+50
+289
+83
 NIL
 render
 NIL
@@ -165,10 +214,10 @@ NIL
 1
 
 BUTTON
-79
-92
-185
-125
+65
+75
+175
+108
 NIL
 setup-scene2
 NIL
@@ -182,12 +231,46 @@ NIL
 1
 
 BUTTON
-127
-156
-244
-189
+205
+105
+322
+138
 NIL
 make-movie
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+65
+115
+175
+148
+NIL
+setup-scene3
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+65
+155
+175
+188
+NIL
+setup-scene4
 NIL
 1
 T
@@ -545,5 +628,5 @@ Line -7500403 true 150 150 90 180
 Line -7500403 true 150 150 210 180
 
 @#$#@#$#@
-0
+1
 @#$#@#$#@

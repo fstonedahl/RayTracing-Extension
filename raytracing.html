@@ -66,10 +66,12 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       Rendering
     </h3>
     <p>
-      <a href="#raytracing:set-resolution">raytracing:set-resolution</a> 
-      <a href="#raytracing:anti-aliasing">raytracing:anti-aliasing</a> 
+      <a href="#raytracing:output-resolution">raytracing:output-resolution</a> 
+      <a href="#raytracing:output-anti-aliasing">raytracing:output-anti-aliasing</a> 
       <a href="#raytracing:render">raytracing:render</a> 
-
+      <a href="#raytracing:render-in-background">raytracing:render-in-background</a> 
+      <a href="#raytracing:start-movie">raytracing:start-movie</a> 
+      <a href="#raytracing:render-next-movie-frame">raytracing:render-next-movie-frame</a> 
     <h2>
       Scene
     </h2>
@@ -94,7 +96,10 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
         raytracing:add-light <i>xcor</i> <i>ycor</i> <i>zcor</i> <i>color</i>
       </h4>
       <p>
-        add a new light to the scene with specified coordinate and color, which can be either Netlogo or RGB color.
+        Add a new light to the scene with specified coordinate and color, which can be either Netlogo or RGB color.
+        If you don't add any lights to the scene, the scene will still be illuminated by 
+        a combination of low ambient light, as well as a "headlamp" placed by the camera location.
+        (The headlamp is only used if you haven't added any lights to the scene.)
       </div>
     <div class="dict_entry">
       <h3>
@@ -134,29 +139,30 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
     </h2>
     <div class="dict_entry">
       <h3>
-        <a name="raytracing:set-reflectivity" id="raytracing:set-reflectivity">raytracing:set-reflectivity</a>
+        <a name="raytracing:set-reflection" id="raytracing:set-reflection">raytracing:set-reflection</a>
       </h3>
       <h4>
-        raytracing:set-reflectivity <i>reflectivity-rate</i>
+        raytracing:set-reflection <i>reflection-rate</i>
       </h4>
       <p>
-        set the reflectivity rate of individual agents.
+        Sets the reflection rate for a individual agent.  
+        A perfect mirror would be 1.0, and no reflection (default) would be 0.0.
+        Glossy/metallic surfaces should fall somewhere in between.
      <pre>
-        example: ask turtle n set [raytracing:set-reflectivity reflectivity-rate]
+        Example: ask turtles [raytracing:set-reflection 0.2]
       </pre>
       </div>
     <div class="dict_entry">
       <h3>
-        <a name="raytracing:set-refractivity" id="raytracing:set-refractivity">raytracing:set-refractivity</a>
+        <a name="raytracing:set-refraction" id="raytracing:set-refraction">raytracing:set-refraction</a>
       </h3>
       <h4>
-        raytracing:set-refractivity <i>refractivity_rate</i>
+        raytracing:set-refraction <i>index-of-refraction</i>
       </h4>
       <p>
-        set the refractivity rate of individual agents.
-      <pre>
-        example: ask turtle n set [raytracing:set-refractivity refractivity-rate]
-      </pre>
+        set the index of refraction for an individual agent. 
+        This setting only affects transparent objects, and causes the light to bend by a certain amount when it passes through.
+        (Air has a refraction index of 1.0 (no bending), whereas water is 1.33, glass is 1.5 and diamond is 2.4.  Values less than 1.0 are possible as well.)
       </div>
     <div class="dict_entry">
       <h3>
@@ -167,9 +173,9 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
         raytracing:set-highlight <i>amount</i> <i>size</i>
       </h4>
       <p>
-        set the highlight on individual agents with specified amount (between 0 and 1) and size (between 0 and 250 - 40 is a good default).
+        set the specular highlight (bright spot) on individual agents with specified amount (between 0 and 1) and spot size (between 0 and 250 - 40 is a good default).
       <pre>
-        example: ask turtle n set [raytracing:set-highlight amount size]
+        example: ask turtles [raytracing:set-highlight 0.4 30]
       </pre>
       </div>
     <div class="dict_entry">
@@ -177,12 +183,12 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
         <a name="raytracing:set-texture" id="raytracing:set-texture">raytracing:set-texture</a>
       </h3>
       <h4>
-        raytracing:set-texture <i>texture_name</i>
+        raytracing:set-texture <i>texture-name</i>
       </h4>
       <p>
-        set the texture mapping on individual agents.
+        set the texture mapping on individual agents.  The texture names are the same as those used by POV-Ray.  To browse through possible textures, see <a href="http://texlib.povray.org/">http://texlib.povray.org/</a>.
       <pre>
-        example: ask turtle n set [raytracing:set-texture texture_name]
+        Example: ask turtles [raytracing:set-texture "T_Stone34"]
       </pre>
       </div>
     <div class="dict_entry">
@@ -190,13 +196,13 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
         <a name="raytracing:set-image" id="raytracing:set-image">raytracing:set-image</a>
       </h3>
       <h4>
-        raytracing:set-image <i>image_name</i>
+        raytracing:set-image <i>image-filename</i>
       </h4>
       <p>
-        set the image mapping on individual agents.
-      <pre>
-        example: ask turtle n set [raytracing:set-image image_name]
-      </pre>
+        set the image mapping on individual agents.  
+        (The image mapping usually doesn't come out perfectly, so you may have to play 
+         with the image file being mapped onto the shape, to get the effect you want.)
+        The image file should be in the same folder as the output image you are creating.
       </div>
 
       <h2>
@@ -204,23 +210,25 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       </h2>
       <div class="dict_entry">
       <h3>
-        <a name="raytracing:set-resolution" id="raytracing:set-resolution">raytracing:set-resolution</a>
+        <a name="raytracing:output-resolution" id="raytracing:output-resolution">raytracing:output-resolution</a>
       </h3>
       <h4>
-        raytracing:set-resolution <i>x_pixel</i> <i>y_pixel</i>
+        raytracing:output-resolution <i>width-in-pixels</i> <i>height-in-pixels</i>
       </h4>
       <p>
         set the resolution of the output image
       </div>
       <div class="dict_entry">
       <h3>
-        <a name="raytracing:anti_aliasing" id="raytracing:anti_aliasing">raytracing:anti_aliasing</a>
+        <a name="raytracing:output-anti-aliasing" id="raytracing:output-anti-aliasing">raytracing:output-anti-aliasing</a>
       </h3>
       <h4>
-        raytracing:anti_aliasing <i>level</i>
+        raytracing:output-anti-aliasing <i>threshold</i>
       </h4>
       <p>
-        set the anti-aliasing level of the rendering process.
+        set the anti-aliasing <i>threshold</i> of the rendering process.
+        The threshold may be between 3.0 and 0.0, with lower thresholds corresponding to more antialiasing.  The default threshold is 0.3.
+        (Note: anti-aliasing only happens when the rendering quality level is 10 or greater).  
       </div>
       <div class="dict_entry">
       <h3>
@@ -232,6 +240,36 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       <p>
         render the scene with the specified output file name (leave off the filename extension - it will be added automatically to create <i>output-file-name.POV</i> and <i></i>output-file-name.PNG</i> ) and <i>quality-level</i> (quality-level 10 is full/normal output - lower numbers will be lower quality, but will render more quickly.  quality-levels 11 and 12 provide slightly higher quality due to jittering and additional antialiased supersampling, but should not be used for creating animations, because the random jittering may vary from frame to frame.)
        <p>Note: The <i>output-file-name</i> path specified is interpreted as relative to the folder that the currently open model is saved in.  However, if the model hasn't been saved yet, the user's home folder may be used for output instead.
+      </div>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:render-in-background" id="raytracing:render-in-background">raytracing:render-in-background</a>
+      </h3>
+      <h4>
+        raytracing:render-in-background <i>output-file-name</i> <i>quality-level</i>
+      </h4>
+      <p> Same as RENDER above, except NetLogo doesn't wait for the rendering to finish, so you 
+      can continue running the model, doing other commands, etc.  (The rendering runs in parallel in the background).
+      </div>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:start-movie" id="raytracing:start-movie">raytracing:start-movie</a>
+      </h3>
+      <h4>
+        raytracing:start-movie <i>movie-file-name-stem</i> <i>quality-level</i>
+      </h4>
+      <p> This command doesn't actually render anything - it just fixes the settings for any future
+      calls to raytracing:render-next-movie-frame.
+      </div>
+      <div class="dict_entry">
+      <h3>
+        <a name="raytracing:render-next-movie-frame" id="raytracing:render-next-movie-frame">raytracing:render-next-movie-frame</a>
+      </h3>
+      <h4>
+        raytracing:render-next-movie-frame
+      </h4>
+      <p> Similar to RENDER above, except that it creates sequentially numbered image files, based on the movie-file-name-stem and quality-level given to the START-MOVIE command.
+      Also, it renders all the images quietly in the background (at least on Linux) to prevent POV-Ray windows from popping up over and over again.
       </div>
  
     <h2>

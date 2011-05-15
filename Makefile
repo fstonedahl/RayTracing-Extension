@@ -21,7 +21,7 @@ raytracing.zip: raytracing.jar README.md raytracing.html raytracing.config.txt s
 	rm -rf raytracing
 	mkdir raytracing
 	cp -rp raytracing.jar README.md Makefile src manifest.txt raytracing.html raytracing.config.txt shapes.txt RayTracing\ Example.nlogo3d raytracing
-	zip -rv raytracing.zip raytracing
+	zip -rv raytracing.zip raytracing RayTracing\ Example.nlogo3d
 	#rm -rf raytracing
 
 clean:
