@@ -1,10 +1,11 @@
 # NetLogo raytracing extension
 
 This package contains the NetLogo raytracing extension, which provides an interface with the popular open-source POV-Ray ray tracing rendering engine.
+This allows you to create stunning high-resolution images from NetLogo 3D and the 3D view of NetLogo 2D (with limited shape support).
 
 ## Using
 
-See the documentation in the included file raytracing.html.
+See the documentation in the included file raytracing.html.  Note that you must also separately install POV-Ray.
 
 ## Building
 
