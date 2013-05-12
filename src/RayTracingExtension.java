@@ -56,6 +56,7 @@ import org.nlogo.api.Patch;
 import org.nlogo.api.Link;
 import org.nlogo.api.Link3D;
 import org.nlogo.api.LogoList;
+import org.nlogo.api.World;
 
 import org.nlogo.api.Agent;
 import org.nlogo.api.Perspective;
@@ -350,15 +351,15 @@ public class RayTracingExtension extends DefaultClassManager {
 	{
 		if(refractionMap.containsKey(agent))
 		{
-			sb.append(String.format("interior{ ior %f }\n", refractionMap.get(agent)));
+			sb.append(String.format(Locale.US, "interior{ ior %f }\n", refractionMap.get(agent)));
 		}
 
 		sb.append("texture {\n");
 
 		if(textureMap.containsKey(agent))
 		{
-			sb.append(String.format("%s\n", textureMap.get(agent)));
-			sb.append(String.format("scale %s", textureScalingMap.get(agent)));
+			sb.append(String.format(Locale.US, "%s\n", textureMap.get(agent)));
+			sb.append(String.format(Locale.US, "scale %s", textureScalingMap.get(agent)));
 		}
 		else
 		{
@@ -371,7 +372,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			else
 			{
 				double transp = getTransparency(agent);
-				sb.append(String.format("color rgb <%f, %f, %f> transmit %f \n", red, green, blue, transp));
+				sb.append(String.format(Locale.US, "color rgb <%f, %f, %f> transmit %f \n", red, green, blue, transp));
 			}
 			sb.append("} \n");
 		}
@@ -380,33 +381,33 @@ public class RayTracingExtension extends DefaultClassManager {
 
 		if(reflectionMap.containsKey(agent))
 		{
-			sb.append(String.format("reflection %f\n", reflectionMap.get(agent)));
+			sb.append(String.format(Locale.US, "reflection %f\n", reflectionMap.get(agent)));
 
 		}
 
 		if(highlightMap.containsKey(agent))
 		{
 
-			sb.append(String.format("phong %f phong_size %f\n", highlightMap.get(agent), highlightSizeMap.get(agent)));
+			sb.append(String.format(Locale.US, "phong %f phong_size %f\n", highlightMap.get(agent), highlightSizeMap.get(agent)));
 		}
 		sb.append("diffuse 0.6\n");
 
 		sb.append("}\n}\n");
 		
 		// now handle geometric transformations...
-		sb.append(String.format("rotate <0, %f, 0>\n", -roll));
-		sb.append(String.format("rotate <%f, 0, 0>\n", -pitch));
-		sb.append(String.format("rotate <0, 0, %f>\n", -heading));
+		sb.append(String.format(Locale.US, "rotate <0, %f, 0>\n", -roll));
+		sb.append(String.format(Locale.US, "rotate <%f, 0, 0>\n", -pitch));
+		sb.append(String.format(Locale.US, "rotate <0, 0, %f>\n", -heading));
 
 		if( agent instanceof Turtle )
 			{
 				double turtleSize = ((Turtle)agent).size();
-				sb.append(String.format("scale <%f, %f, %f>\n", turtleSize, turtleSize, turtleSize));
-				sb.append(String.format("translate <%f, %f, %f>\n", ((Turtle)agent).xcor(), ((Turtle)agent).ycor(), getZcor(agent)));
+				sb.append(String.format(Locale.US, "scale <%f, %f, %f>\n", turtleSize, turtleSize, turtleSize));
+				sb.append(String.format(Locale.US, "translate <%f, %f, %f>\n", ((Turtle)agent).xcor(), ((Turtle)agent).ycor(), getZcor(agent)));
 			}
 		else if( agent instanceof Patch )
 			{
-				sb.append(String.format("translate <%d, %d, %f>\n", ((Patch)agent).pxcor(), ((Patch)agent).pycor(), getZcor(agent)));
+				sb.append(String.format(Locale.US, "translate <%d, %d, %f>\n", ((Patch)agent).pxcor(), ((Patch)agent).pycor(), getZcor(agent)));
 			}
 		sb.append("}\n");
 	}
@@ -429,13 +430,13 @@ public class RayTracingExtension extends DefaultClassManager {
 			double pitchRadians = StrictMath.toRadians( world.observer().pitch() ) ;
 			double sin = StrictMath.sin( pitchRadians ) ;
 			double distProj = 10.0 * StrictMath.cos( pitchRadians ) ;
-
-			if( StrictMath.abs( sin ) < org.nlogo.api.World.INFINITESIMAL )
+			
+			if( StrictMath.abs( sin ) < 3.2E-15 )
 			{
 				sin = 0 ;
 			}
 
-			if( StrictMath.abs( distProj ) < org.nlogo.api.World.INFINITESIMAL )
+			if( StrictMath.abs( distProj ) < 3.2E-15 )
 			{
 				distProj = 0 ;
 			}
@@ -444,12 +445,12 @@ public class RayTracingExtension extends DefaultClassManager {
 			double cosProj = StrictMath.cos( headingRadians ) ;
 			double sinProj = StrictMath.sin( headingRadians ) ;
 
-			if( StrictMath.abs( cosProj ) < org.nlogo.api.World.INFINITESIMAL )
+			if( StrictMath.abs( cosProj ) < 3.2E-15 )
 			{
 				cosProj = 0 ;
 			}
 
-			if( StrictMath.abs( sinProj ) < org.nlogo.api.World.INFINITESIMAL )
+			if( StrictMath.abs( sinProj ) < 3.2E-15 )
 			{
 			  sinProj = 0 ;
 			}
@@ -463,12 +464,12 @@ public class RayTracingExtension extends DefaultClassManager {
 			double sin2 = StrictMath.sin( pitchRadians2 ) ;
 			double distProj2 = 10.0 * StrictMath.cos( pitchRadians2 ) ;
 
-			if( StrictMath.abs( sin2 ) < org.nlogo.api.World.INFINITESIMAL )
+			if( StrictMath.abs( sin2 ) < 3.2E-15 )
 			{
 				sin2 = 0 ;
 			}
 
-			if( StrictMath.abs( distProj2 ) < org.nlogo.api.World.INFINITESIMAL )
+			if( StrictMath.abs( distProj2 ) < 3.2E-15 )
 			{
 				distProj2 = 0 ;
 			}
@@ -477,12 +478,12 @@ public class RayTracingExtension extends DefaultClassManager {
 			double cosProj2 = StrictMath.cos( headingRadians2 ) ;
 			double sinProj2 = StrictMath.sin( headingRadians2 ) ;
 
-			if( StrictMath.abs( cosProj2 ) < org.nlogo.api.World.INFINITESIMAL )
+			if( StrictMath.abs( cosProj2 ) < 3.2E-15 )
 			{
 				cosProj2 = 0 ;
 			}
 
-			if( StrictMath.abs( sinProj2 ) < org.nlogo.api.World.INFINITESIMAL )
+			if( StrictMath.abs( sinProj2 ) < 3.2E-15 )
 			{
 			  sinProj2 = 0 ;
 			}
@@ -530,15 +531,15 @@ public class RayTracingExtension extends DefaultClassManager {
 			   .append( "#include \"woods.inc\"\n")
 			   .append( "#include \"glass.inc\"\n")
 			   .append( "global_settings { max_trace_level 6 }")
-			   .append( String.format("background {rgb <%f, %f, %f> }\n", background_red, background_green, background_blue))
+			   .append( String.format(Locale.US, "background {rgb <%f, %f, %f> }\n", background_red, background_green, background_blue))
 			   .append( "camera {\n" )
-			   .append( String.format("location <%f, %f, %f>\n" ,
+			   .append( String.format(Locale.US, "location <%f, %f, %f>\n" ,
 							world.observer().oxcor() , world.observer().oycor() , -(world.observer().ozcor()) ) )
-			   .append(String.format("right <%f * 0.835, 0, 0>\n", resolution_width.doubleValue() / resolution_height.doubleValue()))
-			   .append(String.format("up <0, 0.835, 0>\n"))
-			   .append(String.format("sky <%f, %f, %f>\n",
+			   .append(String.format(Locale.US, "right <%f * 0.835, 0, 0>\n", resolution_width.doubleValue() / resolution_height.doubleValue()))
+			   .append(String.format(Locale.US, "up <0, 0.835, 0>\n"))
+			   .append(String.format(Locale.US, "sky <%f, %f, %f>\n",
 							skyX, skyY, -skyZ))
-			   .append( String.format("look_at  <%f, %f,  %f>\n" ,
+			   .append( String.format(Locale.US, "look_at  <%f, %f,  %f>\n" ,
 							lookatX , lookatY ,-lookatZ))
 			   .append( "}\n" ) ;
 
@@ -558,7 +559,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			{
 				if( a instanceof org.nlogo.api.Turtle )
 				{
-					if( (    ( world.observer().perspective() != Perspective.RIDE )
+					if( (    ( world.observer().perspective() != org.nlogo.api.PerspectiveJ.RIDE() )
 						  || ( world.observer().targetAgent() != a )
 						) && ( !( (Turtle) a ).hidden() )
 							&& getTransparency((Turtle) a) < 1.0 )
@@ -623,7 +624,7 @@ public class RayTracingExtension extends DefaultClassManager {
 						double red = ((patchColorRGB >> 16) & 0xff) / 255.0;
 
 						sb.append("object{MyPatch\n");
-						//.append(String.format("translate <%d, %d, %d>\n", p.pxcor(), p.pycor(), -(p.pzcor())));
+						//.append(String.format(Locale.US, "translate <%d, %d, %d>\n", p.pxcor(), p.pycor(), -(p.pzcor())));
 
 						addFeatures(p, sb, red, green, blue, 0.0, 0.0, 0.0, "cube");
 					}
@@ -646,9 +647,9 @@ public class RayTracingExtension extends DefaultClassManager {
 					}
 
 					sb.append("cylinder{\n")
-					.append(String.format("<%f, %f, %f>,\n", link.x1(), link.y1(), getLinkZ1(link)))
-					.append(String.format("<%f, %f, %f>,\n", link.x2(), link.y2(), getLinkZ2(link)))
-					.append(String.format("%f\n", thickness / 2));
+					.append(String.format(Locale.US, "<%f, %f, %f>,\n", link.x1(), link.y1(), getLinkZ1(link)))
+					.append(String.format(Locale.US, "<%f, %f, %f>,\n", link.x2(), link.y2(), getLinkZ2(link)))
+					.append(String.format(Locale.US, "%f\n", thickness / 2));
 
 					addFeatures(link, sb, red, green, blue, 0.0, 0.0, 0.0, "cylinder");
 				}
@@ -656,7 +657,7 @@ public class RayTracingExtension extends DefaultClassManager {
 
 			if(lights.isEmpty())
 			{
-			 sb.append(String.format("light_source{ <%f, %f, %f> color rgb <1.5, 1.5, 1.5>}\n", world.observer().oxcor(),
+			 sb.append(String.format(Locale.US, "light_source{ <%f, %f, %f> color rgb <1.5, 1.5, 1.5>}\n", world.observer().oxcor(),
 					 world.observer().oycor() , -(world.observer().ozcor())));   
 			}
 			else
@@ -665,7 +666,7 @@ public class RayTracingExtension extends DefaultClassManager {
 				{
 					ArrayList<Double> tempLight = lights.get(i);
 
-					sb.append(String.format("light_source{ <%f, %f, %f> color rgb <%f, %f, %f>}\n", tempLight.get(0),
+					sb.append(String.format(Locale.US, "light_source{ <%f, %f, %f> color rgb <%f, %f, %f>}\n", tempLight.get(0),
 										tempLight.get(1), -tempLight.get(2), tempLight.get(3), tempLight.get(4), tempLight.get(5)));
 				}
 			}
@@ -772,7 +773,7 @@ public class RayTracingExtension extends DefaultClassManager {
 		public Syntax getSyntax()
 		{
 			return Syntax.commandSyntax
-			    ( new int[] { Syntax.TYPE_STRING , Syntax.TYPE_NUMBER } ) ;
+			    ( new int[] { Syntax.StringType() , Syntax.NumberType() } ) ;
 		}
 		@Override
 		public String getAgentClassString()
@@ -795,7 +796,7 @@ public class RayTracingExtension extends DefaultClassManager {
 		public Syntax getSyntax()
 		{
 			return Syntax.commandSyntax
-			    ( new int[] { Syntax.TYPE_STRING , Syntax.TYPE_NUMBER } ) ;
+			    ( new int[] { Syntax.StringType() , Syntax.NumberType() } ) ;
 		}
 		@Override
 		public String getAgentClassString()
@@ -817,7 +818,7 @@ public class RayTracingExtension extends DefaultClassManager {
 		public Syntax getSyntax()
 		{
 			return Syntax.commandSyntax
-			    ( new int[] { Syntax.TYPE_STRING , Syntax.TYPE_NUMBER } ) ;
+			    ( new int[] { Syntax.StringType() , Syntax.NumberType() } ) ;
 		}
 		@Override
 		public String getAgentClassString()
@@ -856,7 +857,7 @@ public class RayTracingExtension extends DefaultClassManager {
 				throw new ExtensionException("You must call RAYTRACING:MOVIE-START first!");
 			}
 			//TODO: Provide "repeat frame count" as input, to copy the frame multiple times?
-			render(String.format("%s_%05d", movieFileName, movieFrame), movieQuality, true, true, (ExtensionContext) context);
+			render(String.format(Locale.US, "%s_%05d", movieFileName, movieFrame), movieQuality, true, true, (ExtensionContext) context);
 			movieFrame++;			
 		}					      
     }
@@ -866,8 +867,8 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.TYPE_NUMBER, Syntax.TYPE_NUMBER, Syntax.TYPE_NUMBER,
-                                                   Syntax.TYPE_READABLE});
+            return Syntax.commandSyntax(new int[] {Syntax.NumberType(), Syntax.NumberType(), Syntax.NumberType(),
+                                                   Syntax.ReadableType()});
         }
 
         @Override
@@ -950,7 +951,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.TYPE_NUMBER});
+            return Syntax.commandSyntax(new int[] {Syntax.NumberType()});
         }
 
         @Override
@@ -974,7 +975,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.TYPE_NUMBER});
+            return Syntax.commandSyntax(new int[] {Syntax.NumberType()});
         }
 
         @Override
@@ -998,7 +999,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.TYPE_NUMBER, Syntax.TYPE_NUMBER});
+            return Syntax.commandSyntax(new int[] {Syntax.NumberType(), Syntax.NumberType()});
         }
 
         @Override
@@ -1024,7 +1025,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[]{Syntax.TYPE_STRING, Syntax.TYPE_NUMBER});
+            return Syntax.commandSyntax(new int[]{Syntax.StringType(), Syntax.NumberType()});
         }
 
         @Override
@@ -1049,7 +1050,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[]{Syntax.TYPE_NUMBER, Syntax.TYPE_NUMBER});
+            return Syntax.commandSyntax(new int[]{Syntax.NumberType(), Syntax.NumberType()});
         }
 
         @Override
@@ -1071,7 +1072,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[]{Syntax.TYPE_READABLE});
+            return Syntax.commandSyntax(new int[]{Syntax.ReadableType()});
         }
 
         @Override
@@ -1124,7 +1125,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.TYPE_NUMBER});
+            return Syntax.commandSyntax(new int[] {Syntax.NumberType()});
 
         }
 
@@ -1147,7 +1148,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.TYPE_STRING});
+            return Syntax.commandSyntax(new int[] {Syntax.StringType()});
         }
 
         @Override
@@ -1169,7 +1170,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.TYPE_STRING});
+            return Syntax.commandSyntax(new int[] {Syntax.StringType()});
         }
 
         @Override
