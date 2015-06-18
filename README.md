@@ -18,7 +18,7 @@ If compilation succeeds, `raytracing.jar` and `raytracing.zip` (containing every
 
 ## Credits
 
-The idea for the raytracing extension was conceived by Forrest Stonedahl, and the first version was implemented in an independent study course project by Rumou Duan at Northwestern University, under the supervision of Forrest Stonedahl and Uri Wilensky.
+The idea for the raytracing extension was conceived by Forrest Stonedahl, and the first version was implemented in an independent study course project by Rumou Duan at Northwestern University, under the supervision of Forrest Stonedahl and Uri Wilensky.  We thank Dr. Gabriel Wurzer for a patch contribution.
 
 The raytracing extension makes use of the POV-Ray rendering engine, which must be downloaded and installed separately (see http://www.povray.org/ )
 
