@@ -183,12 +183,12 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
         <a name="raytracing:set-texture" id="raytracing:set-texture">raytracing:set-texture</a>
       </h3>
       <h4>
-        raytracing:set-texture <i>texture-name</i>
+        raytracing:set-texture <i>texture-name</i> <i>scaling_factor</i>
       </h4>
       <p>
-        set the texture mapping on individual agents.  The texture names are the same as those used by POV-Ray.  To browse through possible textures, see <a href="http://texlib.povray.org/">http://texlib.povray.org/</a>.
+        set the texture mapping on individual agents.  The texture names are the same as those used by POV-Ray.  To browse through possible textures, see <a href="http://texlib.povray.org/">http://texlib.povray.org/</a>.  
       <pre>
-        Example: ask turtles [raytracing:set-texture "T_Stone34"]
+        Example: ask turtles [raytracing:set-texture "T_Stone34" 1.0]
       </pre>
       </div>
     <div class="dict_entry">
