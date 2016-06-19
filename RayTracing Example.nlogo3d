@@ -3,6 +3,7 @@ extensions [raytracing]
  
 to setup-scene1
   clear-all
+  raytracing:clear-lights
   raytracing:add-light 0 0 10 white
   create-turtles 1 [ 
     set shape "circle"
@@ -32,6 +33,7 @@ end
 
 to setup-scene2
   clear-all
+  raytracing:clear-lights
   raytracing:add-light -5 -5 15 white
   raytracing:add-light 5 5 15 blue
   create-turtles 1 [ 
@@ -81,6 +83,7 @@ end
 
 to setup-scene3
   clear-all
+  raytracing:clear-lights
   crt 3 [
    set shape "circle"
    set size (who + 1) * 3
@@ -106,6 +109,7 @@ end
  
 to setup-scene4
   clear-all  
+  raytracing:clear-lights
   crt 4 [
    set heading 0
    set shape item who ["circle" "triangle" "square" "cylinder"]
@@ -123,6 +127,26 @@ to setup-scene4
   orbit-down 60
 end
  
+to setup-scene5
+  clear-all  
+  raytracing:clear-lights
+  create-turtles 20 [
+    tilt-up random 90
+    tilt-down random 90
+    pen-down
+  ]
+  repeat 4 [
+    ask turtles [
+      forward size + 1
+      stamp
+      set size size + 1
+    ]
+  ]
+  zoom 25
+  
+
+  
+end
 
 to render
   raytracing:output-resolution 1024 768
@@ -134,8 +158,8 @@ to make-movie
   ;; NOTE: If you're creating a bunch of movie frames, it's usually better
   ;; to put them in a subfolder, so create a subfolder called "frames"
   ;; and change the line below to:
-  ;;   raytracing:start-movie "frames/testmovie" 10
-  raytracing:start-movie "testmovie" 10
+  ;;   raytracing:start-movie "frames/movietest" 10
+  raytracing:start-movie "movietest" 10
 
   repeat 60
   [
@@ -271,6 +295,23 @@ BUTTON
 188
 NIL
 setup-scene4
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+65
+200
+175
+233
+NIL
+setup-scene5
 NIL
 1
 T
@@ -610,7 +651,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 3D 5.0beta2
+NetLogo 3D 5.2.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -618,9 +659,9 @@ NetLogo 3D 5.0beta2
 @#$#@#$#@
 default
 0.0
--0.2 0 1.0 0.0
+-0.2 0 0.0 1.0
 0.0 1 1.0 0.0
-0.2 0 1.0 0.0
+0.2 0 0.0 1.0
 link direction
 true
 0

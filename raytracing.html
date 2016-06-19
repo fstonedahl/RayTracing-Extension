@@ -40,6 +40,7 @@ extensions [raytracing]
 </pre>
     <p>
 For more information about rendering primitive, see the <a href="#raytracing:render">raytracing:render</a> documentation below.
+GENERAL TIP: Save your model before rendering, just in case -- to prevent lost work in case povray hangs/crashes/takes hours to finish.
     <p>
     For more information on using Netlogo extensions, see the <a href="extensions.html">Extensions Guide</a>.
     <h2>
@@ -69,7 +70,6 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       <a href="#raytracing:output-resolution">raytracing:output-resolution</a> 
       <a href="#raytracing:output-anti-aliasing">raytracing:output-anti-aliasing</a> 
       <a href="#raytracing:render">raytracing:render</a> 
-      <a href="#raytracing:render-in-background">raytracing:render-in-background</a> 
       <a href="#raytracing:start-movie">raytracing:start-movie</a> 
       <a href="#raytracing:render-next-movie-frame">raytracing:render-next-movie-frame</a> 
     <h2>
@@ -240,16 +240,6 @@ For more information about rendering primitive, see the <a href="#raytracing:ren
       <p>
         render the scene with the specified output file name (leave off the filename extension - it will be added automatically to create <i>output-file-name.POV</i> and <i></i>output-file-name.PNG</i> ) and <i>quality-level</i> (quality-level 10 is full/normal output - lower numbers will be lower quality, but will render more quickly.  quality-levels 11 and 12 provide slightly higher quality due to jittering and additional antialiased supersampling, but should not be used for creating animations, because the random jittering may vary from frame to frame.)
        <p>Note: The <i>output-file-name</i> path specified is interpreted as relative to the folder that the currently open model is saved in.  However, if the model hasn't been saved yet, the user's home folder may be used for output instead.
-      </div>
-      <div class="dict_entry">
-      <h3>
-        <a name="raytracing:render-in-background" id="raytracing:render-in-background">raytracing:render-in-background</a>
-      </h3>
-      <h4>
-        raytracing:render-in-background <i>output-file-name</i> <i>quality-level</i>
-      </h4>
-      <p> Same as RENDER above, except NetLogo doesn't wait for the rendering to finish, so you 
-      can continue running the model, doing other commands, etc.  (The rendering runs in parallel in the background).
       </div>
       <div class="dict_entry">
       <h3>

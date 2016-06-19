@@ -44,6 +44,7 @@ import org.nlogo.api.Argument;
 import org.nlogo.api.Context;
 import org.nlogo.api.DefaultClassManager;
 import org.nlogo.api.DefaultCommand;
+import org.nlogo.api.Drawing3D;
 import org.nlogo.api.ExtensionException;
 import org.nlogo.api.ExtensionManager;
 import org.nlogo.api.LogoException;
@@ -57,11 +58,11 @@ import org.nlogo.api.Link;
 import org.nlogo.api.Link3D;
 import org.nlogo.api.LogoList;
 import org.nlogo.api.World;
-
 import org.nlogo.api.Agent;
 import org.nlogo.api.Perspective;
-import java.io.*;
+import org.nlogo.api.World3D;
 
+import java.io.*;
 import java.util.*;
 
 import org.nlogo.nvm.ExtensionContext;
@@ -145,7 +146,7 @@ public class RayTracingExtension extends DefaultClassManager {
 	{
         primitiveManager.addPrimitive( "clear-all", new ClearAll());
 		primitiveManager.addPrimitive( "render" , new Render() ) ;
-		primitiveManager.addPrimitive( "render-in-background" , new RenderInBackground() ) ;
+		//primitiveManager.addPrimitive( "render-in-background" , new RenderInBackground() ) ;
 		primitiveManager.addPrimitive( "start-movie" , new StartMovie() );
 		primitiveManager.addPrimitive( "render-next-movie-frame" , new RenderNextMovieFrame() ) ;
         primitiveManager.addPrimitive( "add-light", new AddLight());
@@ -286,7 +287,10 @@ public class RayTracingExtension extends DefaultClassManager {
      * @return a value between 0 (opaque) and 1 (fully transparent)
      */
     private static double getTransparency(Agent agent) {
-        if (agent instanceof Turtle) {
+    	if (agent == null) {  // special case for 3D turtle trails -- which don't keep transparency recorded...   
+    		return 0;  
+    	}
+    	else if (agent instanceof Turtle) {
             return (1 - getAlpha((Turtle) agent) / 255.0);
         } else if (agent instanceof Patch3D) {
             return (1 - getAlpha((Patch3D) agent) / 255.0);
@@ -347,7 +351,7 @@ public class RayTracingExtension extends DefaultClassManager {
 		return sb.toString();
 	}
 
-	private static void addFeatures(Agent agent, StringBuilder sb, double red, double green, 	   double blue, double roll, double pitch, double heading, String shape)
+	private static void addFeatures(Agent agent, StringBuilder sb, double red, double green, double blue, double roll, double pitch, double heading, String shape)
 	{
 		if(refractionMap.containsKey(agent))
 		{
@@ -410,6 +414,100 @@ public class RayTracingExtension extends DefaultClassManager {
 				sb.append(String.format(Locale.US, "translate <%d, %d, %f>\n", ((Patch)agent).pxcor(), ((Patch)agent).pycor(), getZcor(agent)));
 			}
 		sb.append("}\n");
+	}
+	
+	public static void renderTurtle(Turtle turt, World world, StringBuilder sb) {
+		if( (    ( world.observer().perspective() != org.nlogo.api.PerspectiveJ.RIDE() )
+			  || ( world.observer().targetAgent() != turt )
+			) && ( !( (Turtle) turt ).hidden() )
+				&& getTransparency((Turtle) turt) < 1.0 )
+		{
+			Turtle t = (Turtle) turt ;
+			 //getOrientation(t);
+			double heading = t.heading();
+			double pitch = getPitch(t) ;
+			double roll = getRoll(t);
+			java.awt.Color turtleColor = org.nlogo.api.Color.getColor(t.color());
+			int turtleColorRGB = turtleColor.getRGB();
+			double blue = (turtleColorRGB & 0xff) / 255.0;
+			double green = ((turtleColorRGB >> 8) & 0xff) / 255.0;
+			double red = ((turtleColorRGB >> 16) & 0xff) / 255.0;
+
+			//double turtleSize = t.size();
+
+
+			if ((t.shape()).equals("default"))
+			{
+				sb.append("object{MyTurtle\n");
+			}
+			else if (t.shape().equals("sphere") || t.shape().equals("circle"))
+			{
+				sb.append("object { MySphere\n");
+			}
+			else if (t.shape().equals("cube") || t.shape().equals("square"))
+			{
+				sb.append("object{MyPatch\n"); //TODO: Distinguish between patches & turtle cubes... just for conceptually clarity in the POV file.
+			}
+			else if (t.shape().equals("car"))
+			{
+			   sb.append("object{myCar\n");
+			}
+			else if (t.shape().equals("cylinder"))
+			{
+				sb.append("object {MyCylinder\n");
+			}
+			else if(t.shape().equals("cone") || t.shape().equals("triangle"))
+			{
+				sb.append("object {MyCone\n");
+			}
+			else 
+			{
+				sb.append("object {" + t.shape() + "\n");
+			}
+
+			addFeatures(t, sb, red, green, blue, roll, pitch, heading,t.shape());
+
+		}
+	}
+	public static void renderLink(Link link, StringBuilder sb) {
+
+		if (!link.hidden() && getTransparency(link) < 1.0)
+		{
+			java.awt.Color linkColor = org.nlogo.api.Color.getColor(link.color());
+			int linkColorRGB = linkColor.getRGB();
+			double blue = (linkColorRGB & 0xff) / 255.0;
+			double green = ((linkColorRGB >> 8) & 0xff) / 255.0;
+			double red = ((linkColorRGB >> 16) & 0xff) / 255.0;
+			double thickness = link.lineThickness();
+			if (thickness == 0.0) { 
+				thickness = 0.1;
+			}
+
+			sb.append("cylinder{\n")
+			.append(String.format(Locale.US, "<%f, %f, %f>,\n", link.x1(), link.y1(), getLinkZ1(link)))
+			.append(String.format(Locale.US, "<%f, %f, %f>,\n", link.x2(), link.y2(), getLinkZ2(link)))
+			.append(String.format(Locale.US, "%f\n", thickness / 2));
+
+			addFeatures(link, sb, red, green, blue, 0.0, 0.0, 0.0, "cylinder");
+		}
+	}
+	public static void renderTrailLineSegment3D(org.nlogo.api.DrawingLine3D line, World3D world, StringBuilder sb) {
+		java.awt.Color linkColor = org.nlogo.api.Color.getColor(line.color());
+		int linkColorRGB = linkColor.getRGB();
+		double blue = (linkColorRGB & 0xff) / 255.0;
+		double green = ((linkColorRGB >> 8) & 0xff) / 255.0;
+		double red = ((linkColorRGB >> 16) & 0xff) / 255.0;
+		
+		// TODO: allow user to specify trail width using a primitive.
+		// For now, fudge to usually get decent width of trail (since NetLogo 3D doesn't record/display trail width)
+		double thickness = (world.worldWidth() + world.worldHeight() + world.worldDepth()) / 500.0;   
+
+		sb.append("cylinder{\n")
+		.append(String.format(Locale.US, "<%f, %f, %f>,\n", line.x0(), line.y0(), - line.z0()))
+		.append(String.format(Locale.US, "<%f, %f, %f>,\n", line.x1(), line.y1(), - line.z1()))
+		.append(String.format(Locale.US, "%f\n", thickness / 2));
+
+		addFeatures(null, sb, red, green, blue, 0.0, 0.0, 0.0, "cylinder");		
 	}
 	public static void render(String outputFileName, int quality, boolean waitForProcess, boolean quietly, ExtensionContext ec) throws ExtensionException, LogoException
 	{
@@ -522,15 +620,19 @@ public class RayTracingExtension extends DefaultClassManager {
 			BufferedWriter out = new BufferedWriter( new FileWriter( temp ) ) ;
 
 			StringBuilder sb = new StringBuilder();
+			sb.append( "#version 3.6;\n");  //TODO: #update version to 3.6 or 3.7 sometime?
 			
-			
+			File customIncludeFile = new File(temp.getParent() + "/custom.inc");
+			if (customIncludeFile.exists()) {
+			   sb.append( "#include \"custom.inc\"\n");
+			}
 			sb.append( "#include \"colors.inc\"\n" )
 			   .append( "#include \"shapes.inc\"\n" )
 			   .append( "#include \"stones.inc\"\n" )
 			   .append( "#include \"textures.inc\"\n" )
 			   .append( "#include \"woods.inc\"\n")
 			   .append( "#include \"glass.inc\"\n")
-			   .append( "global_settings { max_trace_level 6 }")
+			   .append( "global_settings { max_trace_level 6 assumed_gamma 2.2 }")
 			   .append( String.format(Locale.US, "background {rgb <%f, %f, %f> }\n", background_red, background_green, background_blue))
 			   .append( "camera {\n" )
 			   .append( String.format(Locale.US, "location <%f, %f, %f>\n" ,
@@ -555,61 +657,18 @@ public class RayTracingExtension extends DefaultClassManager {
 			sb.append(builtInShapesText);
 
 			sb.append("\n");
-			for( Agent a : world.turtles().agents() )
+						
+			
+			for( Agent aTurt : world.turtles().agents() )
 			{
-				if( a instanceof org.nlogo.api.Turtle )
-				{
-					if( (    ( world.observer().perspective() != org.nlogo.api.PerspectiveJ.RIDE() )
-						  || ( world.observer().targetAgent() != a )
-						) && ( !( (Turtle) a ).hidden() )
-							&& getTransparency((Turtle) a) < 1.0 )
-					{
-						Turtle t = (Turtle) a ;
-						 //getOrientation(t);
-						double heading = t.heading();
-						double pitch = getPitch(t) ;
-						double roll = getRoll(t);
-						java.awt.Color turtleColor = org.nlogo.api.Color.getColor(t.color());
-						int turtleColorRGB = turtleColor.getRGB();
-						double blue = (turtleColorRGB & 0xff) / 255.0;
-						double green = ((turtleColorRGB >> 8) & 0xff) / 255.0;
-						double red = ((turtleColorRGB >> 16) & 0xff) / 255.0;
-
-						double turtleSize = t.size();
-
-
-						if ((t.shape()).equals("default"))
-						{
-							sb.append("object{MyTurtle\n");
-						}
-						else if (t.shape().equals("sphere") || t.shape().equals("circle"))
-						{
-							sb.append("object { MySphere\n");
-						}
-						else if (t.shape().equals("cube") || t.shape().equals("square"))
-						{
-							sb.append("object{MyPatch\n"); //TODO: Distinguish between patches & turtle cubes... just for conceptually clarity in the POV file.
-						}
-						else if (t.shape().equals("car"))
-						{
-						   sb.append("object{myCar\n");
-						}
-						else if (t.shape().equals("cylinder"))
-						{
-							sb.append("object {MyCylinder\n");
-						}
-						else if(t.shape().equals("cone") || t.shape().equals("triangle"))
-						{
-							sb.append("object {MyCone\n");
-						}
-
-						addFeatures(t, sb, red, green, blue, roll, pitch, heading,t.shape());
-
-					}
-				}
-
+				renderTurtle((Turtle) aTurt, world, sb);
 			}
-
+			
+			if (world.getDrawing() instanceof Drawing3D) {
+				for( Agent aTurtStamp : ((Drawing3D) world.getDrawing()).turtleStamps()) {
+					renderTurtle((Turtle) aTurtStamp, world, sb);
+				}			
+			}
 			for(Agent a : world.patches().agents())
 			{
 				if(a instanceof org.nlogo.api.Patch)
@@ -631,30 +690,21 @@ public class RayTracingExtension extends DefaultClassManager {
 				}
 			}
 
-			for(Agent a : world.links().agents())
+			for(Agent aLink : world.links().agents())
 			{
-				Link link = (Link) a ;
-				if (!link.hidden() && getTransparency(link) < 1.0)
+				renderLink((Link) aLink, sb);
+			}
+			if (world.getDrawing() instanceof Drawing3D) {
+				for(Agent aLinkStamp : ((Drawing3D) world.getDrawing()).linkStamps())
 				{
-					java.awt.Color linkColor = org.nlogo.api.Color.getColor(link.color());
-					int linkColorRGB = linkColor.getRGB();
-					double blue = (linkColorRGB & 0xff) / 255.0;
-					double green = ((linkColorRGB >> 8) & 0xff) / 255.0;
-					double red = ((linkColorRGB >> 16) & 0xff) / 255.0;
-					double thickness = link.lineThickness();
-					if (thickness == 0.0) { 
-						thickness = 0.1;
-					}
-
-					sb.append("cylinder{\n")
-					.append(String.format(Locale.US, "<%f, %f, %f>,\n", link.x1(), link.y1(), getLinkZ1(link)))
-					.append(String.format(Locale.US, "<%f, %f, %f>,\n", link.x2(), link.y2(), getLinkZ2(link)))
-					.append(String.format(Locale.US, "%f\n", thickness / 2));
-
-					addFeatures(link, sb, red, green, blue, 0.0, 0.0, 0.0, "cylinder");
+					renderLink((Link) aLinkStamp, sb);
+				}
+				for( org.nlogo.api.DrawingLine3D line : ( (Drawing3D) world.getDrawing() ).lines() )
+				{
+					renderTrailLineSegment3D(line, (World3D) world, sb);
 				}
 			}
-
+			
 			if(lights.isEmpty())
 			{
 			 sb.append(String.format(Locale.US, "light_source{ <%f, %f, %f> color rgb <1.5, 1.5, 1.5>}\n", world.observer().oxcor(),
@@ -723,28 +773,33 @@ public class RayTracingExtension extends DefaultClassManager {
 			}
 			else
 			{
+				cmdArgs.add("-V"); // less verbose
 				cmdArgs.add("+I" + temp.getAbsolutePath());
 				cmdArgs.add("+O" + filePath + ".png");
+				
 				//cmdArgs.add("+P"); // pause?
 				povrayProcessBuilder = new ProcessBuilder(cmdArgs) ;
 			}
 			povrayProcessBuilder.directory(temp.getParentFile());
-			Process process = povrayProcessBuilder.start() ;
-			process.waitFor();
+			povrayProcessBuilder.redirectErrorStream(true);  // combine STDERR & STDOUT so we can easily empty both pipe buffers when we read below...
 
-			// This is a rather klunky way of checking for error messages, 
-			// But I tried checking the process.exitValue(), and it seemed
-			// like POV-Ray wasn't following that convention of non-zero exits.
-			java.io.BufferedReader err = new java.io.BufferedReader(new java.io.InputStreamReader(process.getErrorStream()));
+			//System.out.println(cmdArgs);
+			Process process = povrayProcessBuilder.start() ;
+
+			// This is a rather hackish/klunky way of checking for error messages, 
+			// But POV-Ray doesn't seem to follow the convention of using non-zero exit statuses to signify errors,
+			// and it prints out almost everything to stderr, instead of stdout.
+			// 
+			// Note: Most importantly, we MUST read in all the data povray is spewing out, 
+			// because if we don't then the PIPE buffer can become full, 
+			// and this can cause the povray subprocess to hang/deadlock.
+			java.io.BufferedReader povrayOutputReader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()));
 			String errorText = "";
-			String fullErrorText = "";
 			String line;
-			while ((line = err.readLine()) != null)
+			while ((line = povrayOutputReader.readLine()) != null)
 			{
-				fullErrorText += line;
-				// Also, POV-Ray spews out so much output, it seems better to give
-				// the user only the brief error, rather than subject them to
-				// a massive amount of credits/text/garbage/etc.
+				System.err.println(line);
+				// if povray reports an error (hopefully it always uses the word "error"!)
 				if (line.toLowerCase().indexOf("error") > -1)
 				{
 					errorText += line + "\n";
@@ -752,19 +807,13 @@ public class RayTracingExtension extends DefaultClassManager {
 			}
 			if (errorText.toLowerCase().indexOf("error") > -1)
 			{
-				System.err.println(fullErrorText);
 				javax.swing.JOptionPane.showMessageDialog(null, errorText, "Error runinng POV-Ray", javax.swing.JOptionPane.ERROR_MESSAGE); 
 			}
-
 		}
 		catch( IOException ex )
 		{ 
 			throw new ExtensionException(ex);
 		}
-		catch (InterruptedException ex) 
-		{
-			throw new ExtensionException(ex);
-		}		
 	}
 
     public static class Render extends DefaultCommand
@@ -790,28 +839,6 @@ public class RayTracingExtension extends DefaultClassManager {
 		}					      
     }
 
-    public static class RenderInBackground extends DefaultCommand
-	{
-		@Override
-		public Syntax getSyntax()
-		{
-			return Syntax.commandSyntax
-			    ( new int[] { Syntax.StringType() , Syntax.NumberType() } ) ;
-		}
-		@Override
-		public String getAgentClassString()
-		{
-			return "OTPL" ;
-		}
-		
-		public void perform( Argument args[] , Context context ) 
-				throws ExtensionException, LogoException
-		{
-			String outputFileName  = args[ 0 ].getString() ;
-			int quality  = args[ 1 ].getIntValue() ;
-			render(outputFileName, quality, false, false, (ExtensionContext) context);
-		}					      
-    }
     public static class StartMovie extends DefaultCommand
 	{
 		@Override
