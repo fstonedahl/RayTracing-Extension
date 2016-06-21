@@ -20,7 +20,7 @@ raytracing.jar: $(SRCS) manifest.txt
 raytracing.zip: raytracing.jar README.md raytracing.html raytracing.config.txt shapes.txt RayTracing\ Example.nlogo3d 
 	rm -rf raytracing
 	mkdir raytracing
-	cp -rp raytracing.jar README.md Makefile src manifest.txt raytracing.html raytracing.config.txt shapes.txt RayTracing\ Example.nlogo3d raytracing
+	cp -rp raytracing.jar README.md Makefile src manifest.txt raytracing.html raytracing.config.txt shapes.txt raytracing
 	zip -rv raytracing.zip raytracing RayTracing\ Example.nlogo3d gabby.jpg samplesky.jpg
 	#rm -rf raytracing
 
