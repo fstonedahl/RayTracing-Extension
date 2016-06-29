@@ -135,6 +135,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			java.util.Properties props = new java.util.Properties();
 			props.load(new java.io.StringReader(wholeFile));
 			POVRAY_EXE = props.getProperty("povray_executable", "povray"); 
+			POVRAY_EXE = POVRAY_EXE.replace("\"", ""); // remove quotes inside the path, if there were any... 
 		} catch (IOException ex)
 		{
 			throw new ExtensionException("Failed to load config file: raytracing/raytracing.config.txt");
@@ -727,6 +728,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			out.close() ;
 
 			List<String> cmdArgs = new ArrayList<String>();
+
 			cmdArgs.add(POVRAY_EXE);
 			if (quietly)
 			{
@@ -769,17 +771,18 @@ public class RayTracingExtension extends DefaultClassManager {
 				// command line args:  /RENDER xxx.pov /EDIT xxx.pov
 				// which might allow the user to leave POVRAY open, and make
 				// it easier for them to hand edit the files...
-				povrayProcessBuilder = new ProcessBuilder("cmd","/C", joinStrings(cmdArgs," ")) ;
+				// also, we used to be using cmd /c to start it, but I don't know why, and it seems to work without that now...
+				//povrayProcessBuilder = new ProcessBuilder("cmd","/C", joinStrings(cmdArgs," ")) ;
 			}
 			else
 			{
 				cmdArgs.add("-V"); // less verbose
-				cmdArgs.add("+I" + temp.getAbsolutePath());
-				cmdArgs.add("+O" + filePath + ".png");
+				cmdArgs.add("+I'" + temp.getPath() +"'");
+				cmdArgs.add("+O'" + filePath + ".png'");
 				
 				//cmdArgs.add("+P"); // pause?
-				povrayProcessBuilder = new ProcessBuilder(cmdArgs) ;
 			}
+			povrayProcessBuilder = new ProcessBuilder(cmdArgs) ;
 			povrayProcessBuilder.directory(temp.getParentFile());
 			povrayProcessBuilder.redirectErrorStream(true);  // combine STDERR & STDOUT so we can easily empty both pipe buffers when we read below...
 
@@ -812,7 +815,7 @@ public class RayTracingExtension extends DefaultClassManager {
 		}
 		catch( IOException ex )
 		{ 
-			throw new ExtensionException(ex);
+			throw new ExtensionException(ex + "\nNote: did you install POV-Ray and modify the raytracing.config.txt file?");
 		}
 	}
 

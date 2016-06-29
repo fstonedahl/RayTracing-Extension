@@ -1,7 +1,11 @@
 # Unless the POV-Ray executable is in your PATH, you should 
 # set povray_executable to point to the full path of the program.
+#
 # * On Windows, this path may look like: 
-#   C:/Users/YourUserName/AppData/Roaming/POV-Ray/v3.6/bin/pvengine-sse2.exe
+#   C:/Program Files/POV-Ray/v3.7/bin/pvengine64.exe
+#  IMPORTANT: 
+#    Use forward slashes / instead of \ in your path!
+#
 # * On Linux, you can likely just set it to "povray"
 povray_executable=povray
 
