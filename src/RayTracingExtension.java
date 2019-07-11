@@ -43,35 +43,41 @@ package org.nlogo.extensions.raytracing;
 import org.nlogo.api.Argument;
 import org.nlogo.api.Context;
 import org.nlogo.api.DefaultClassManager;
-import org.nlogo.api.DefaultCommand;
 import org.nlogo.api.Drawing3D;
 import org.nlogo.api.ExtensionException;
-import org.nlogo.api.ExtensionManager;
+import org.nlogo.api.FileIO;
 import org.nlogo.api.LogoException;
+import org.nlogo.api.ObserverOrientation;
 import org.nlogo.api.PrimitiveManager;
-import org.nlogo.api.Syntax;
 import org.nlogo.api.Turtle3D;
 import org.nlogo.api.Turtle;
 import org.nlogo.api.Patch3D;
 import org.nlogo.api.Patch;
 import org.nlogo.api.Link;
 import org.nlogo.api.Link3D;
-import org.nlogo.api.LogoList;
 import org.nlogo.api.World;
 import org.nlogo.api.Agent;
-import org.nlogo.api.Perspective;
 import org.nlogo.api.World3D;
+import org.nlogo.core.LogoList;
+import org.nlogo.core.Syntax;
+import org.nlogo.core.SyntaxJ;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URLClassLoader;
 import java.util.*;
 
 import org.nlogo.nvm.ExtensionContext;
+
+import scala.io.Codec;
 
 
 public class RayTracingExtension extends DefaultClassManager {
 	
 	private static String POVRAY_EXE = "povray";
 	private static String builtInShapesText = "";
+
+	private static File extensionDirectory;    
 	
     private static ArrayList< ArrayList<Double> > lights = new ArrayList< ArrayList<Double> >();
     private static HashMap<Agent, Double> reflectionMap = new HashMap<Agent, Double>();
@@ -81,8 +87,8 @@ public class RayTracingExtension extends DefaultClassManager {
     private static HashMap<Agent, String> textureMap = new HashMap<Agent, String>();
     private static HashMap<Agent, Double> textureScalingMap = new HashMap<Agent, Double>();
     private static HashMap<Agent, String> imageMap = new HashMap<Agent, String>();
-    private static Integer resolution_width = new Integer(800);
-    private static Integer resolution_height = new Integer(600);
+    private static int resolution_width = 800;
+    private static int resolution_height = 600;
     private static double anti_aliasing = 0.3;
     private static double background_red = 0.0;
     private static double background_green = 0.0;
@@ -91,7 +97,7 @@ public class RayTracingExtension extends DefaultClassManager {
     
     private static String movieFileName = null;
     private static int movieFrame = 0;
-	private static int movieQuality = 0;    
+	private static int movieQuality = 0;
 
 	@Override
 	public void clearAll()
@@ -123,15 +129,22 @@ public class RayTracingExtension extends DefaultClassManager {
 
     public void runOnce(org.nlogo.api.ExtensionManager em) throws ExtensionException
     {
+    	try {
+			extensionDirectory = new File(((URLClassLoader)this.getClass().getClassLoader()).getURLs()[0].toURI().getPath()).getParentFile();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+    	
 		try {
-			builtInShapesText = em.getFile("raytracing/shapes.txt").readFile();
+			
+			builtInShapesText = FileIO.fileToString(new File(extensionDirectory, "shapes.txt"), Codec.defaultCharsetCodec());
 		} catch (IOException ex)
 		{
+			ex.printStackTrace();
 			throw new ExtensionException("Failed to load shapes file: raytracing/shapes.txt");
 		}
 		try {
-			org.nlogo.api.File configFile = em.getFile("raytracing/raytracing.config.txt");
-			String wholeFile = configFile.readFile();
+			String wholeFile = FileIO.fileToString(new File(extensionDirectory, "raytracing.config.txt"), Codec.defaultCharsetCodec());
 			java.util.Properties props = new java.util.Properties();
 			props.load(new java.io.StringReader(wholeFile));
 			POVRAY_EXE = props.getProperty("povray_executable", "povray"); 
@@ -165,82 +178,52 @@ public class RayTracingExtension extends DefaultClassManager {
 	}
 
 
-    private static double getZcor(Agent a)
-    {
-        if (org.nlogo.api.Version.is3D())
-        {
-            if (a instanceof Patch3D)
-            {
-               return -((Patch3D)a).pzcor();
-            }
-            else if (a instanceof Turtle3D)
-            {
-                return -((Turtle3D)a).zcor();
-            }
-        }
-        else
-        {
-            if (a instanceof Patch)
-            {
-                return 0;
-            }
-            else if (a instanceof Turtle)
-            {
-                return -1;
-            }
-        }
+	private static double getZcor(Agent a) {
+		if (a instanceof Patch3D) {
+			return -((Patch3D) a).pzcor();
+		} else if (a instanceof Patch) {
+			return 0;
+		} else if (a instanceof Turtle3D) {
+			return -((Turtle3D) a).zcor();
+		} else if (a instanceof Turtle) {
+			return -1;
+		}
+		throw new IllegalStateException("Unknown agent type!");
+	}
 
-        throw new IllegalStateException("Unknown agent type!");
-    }
-    private static double getPitch(Turtle t)
-    {
-        if (t instanceof Turtle3D)
-        {
-            return ((Turtle3D)t).pitch();
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    private static double getRoll(Turtle t)
-    {
-        if (t instanceof Turtle3D)
-        {
-            return ((Turtle3D)t).roll();
-        }
-        else
-        {
-            return 0;
-        }
-    }
+	private static double getPitch(Turtle t) {
+		if (t instanceof Turtle3D) {
+			return ((Turtle3D) t).pitch();
+		} else {
+			return 0;
+		}
+	}
 
+	private static double getRoll(Turtle t) {
+		if (t instanceof Turtle3D) {
+			return ((Turtle3D) t).roll();
+		} else {
+			return 0;
+		}
+	}
 
-    private static double getLinkZ1(Link mylink)
-    {
-        if (mylink instanceof Link3D)
-        {
-             return - ((Link3D)mylink).z1();
-        }
-        else
-        {
-            return -1;
-        }
-    }
+	private static double getLinkZ1(Link mylink) {
+		if (mylink instanceof Link3D) {
+			return -((Link3D) mylink).z1();
+		} else {
+			return -1;
+		}
+	}
 
-    private static double getLinkZ2(Link mylink)
-    {
-        if (mylink instanceof Link3D)
-        {
-             return - ((Link3D)mylink).z2();
-        }
-        else
-        {
-            return -1;
-        }
-    }
+	private static double getLinkZ2(Link mylink) {
+		if (mylink instanceof Link3D) {
+			return -((Link3D) mylink).z2();
+		} else {
+			return -1;
+		}
+	}
 
-	/** Returns the alpha (transparency) value between 0 (fully transparent) and 255 (fully opaque)
+	/** Returns the alpha (opacity) value between 0 (fully transparent) and 255 (fully opaque)
 	*/
     private static double getAlpha(Agent a)
     {
@@ -302,20 +285,6 @@ public class RayTracingExtension extends DefaultClassManager {
         }
         throw new IllegalStateException("unknown agent type");
     }
-
-	/* Pity Java doesn't have a built-in "join" method for strings... */
-	 static String joinStrings(Collection<?> s, String delimiter) {
-		 StringBuilder builder = new StringBuilder();
-		 Iterator iter = s.iterator();
-		 while (iter.hasNext()) {
-			 builder.append(iter.next());
-			 if (!iter.hasNext()) {
-			   break;                  
-			 }
-			 builder.append(delimiter);
-		 }
-		 return builder.toString();
-	 }
 	 
 	private static String getImageMapCode(String imageFile, String shape)
 	{
@@ -418,7 +387,7 @@ public class RayTracingExtension extends DefaultClassManager {
 	}
 	
 	public static void renderTurtle(Turtle turt, World world, StringBuilder sb) {
-		if( (    ( world.observer().perspective() != org.nlogo.api.PerspectiveJ.RIDE() )
+		if( (    ( world.observer().perspective().kind() != org.nlogo.api.PerspectiveJ.RIDE )
 			  || ( world.observer().targetAgent() != turt )
 			) && ( !( (Turtle) turt ).hidden() )
 				&& getTransparency((Turtle) turt) < 1.0 )
@@ -525,8 +494,9 @@ public class RayTracingExtension extends DefaultClassManager {
 					world.observer().oxcor() , world.observer().oycor() , world.observer().ozcor() ) ;
 		*/
 		   // org.nlogo.agent.Protractor3D protractor3D = world3d.protractor3D() ;
+			ObserverOrientation cameraOrientation = world.observer().orientation().get();
 
-			double pitchRadians = StrictMath.toRadians( world.observer().pitch() ) ;
+			double pitchRadians = StrictMath.toRadians( cameraOrientation.pitch() ) ;
 			double sin = StrictMath.sin( pitchRadians ) ;
 			double distProj = 10.0 * StrictMath.cos( pitchRadians ) ;
 			
@@ -540,7 +510,7 @@ public class RayTracingExtension extends DefaultClassManager {
 				distProj = 0 ;
 			}
 
-			double headingRadians = StrictMath.toRadians( world.observer().heading() ) ;
+			double headingRadians = StrictMath.toRadians( cameraOrientation.heading() ) ;
 			double cosProj = StrictMath.cos( headingRadians ) ;
 			double sinProj = StrictMath.sin( headingRadians ) ;
 
@@ -559,7 +529,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			double lookatZ = world.observer().ozcor() - ( 10.0 * sin );
 
 
-			double pitchRadians2 = StrictMath.toRadians( world.observer().pitch() + 90 ) ;
+			double pitchRadians2 = StrictMath.toRadians(cameraOrientation.pitch() + 90 ) ;
 			double sin2 = StrictMath.sin( pitchRadians2 ) ;
 			double distProj2 = 10.0 * StrictMath.cos( pitchRadians2 ) ;
 
@@ -573,7 +543,7 @@ public class RayTracingExtension extends DefaultClassManager {
 				distProj2 = 0 ;
 			}
 
-			double headingRadians2 = StrictMath.toRadians( world.observer().heading() ) ;
+			double headingRadians2 = StrictMath.toRadians( cameraOrientation.heading() ) ;
 			double cosProj2 = StrictMath.cos( headingRadians2 ) ;
 			double sinProj2 = StrictMath.sin( headingRadians2 ) ;
 
@@ -638,7 +608,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			   .append( "camera {\n" )
 			   .append( String.format(Locale.US, "location <%f, %f, %f>\n" ,
 							world.observer().oxcor() , world.observer().oycor() , -(world.observer().ozcor()) ) )
-			   .append(String.format(Locale.US, "right <%f * 0.835, 0, 0>\n", resolution_width.doubleValue() / resolution_height.doubleValue()))
+			   .append(String.format(Locale.US, "right <%f * 0.835, 0, 0>\n", (double) resolution_width / resolution_height))
 			   .append(String.format(Locale.US, "up <0, 0.835, 0>\n"))
 			   .append(String.format(Locale.US, "sky <%f, %f, %f>\n",
 							skyX, skyY, -skyZ))
@@ -819,18 +789,13 @@ public class RayTracingExtension extends DefaultClassManager {
 		}
 	}
 
-    public static class Render extends DefaultCommand
+    public static class Render implements org.nlogo.api.Command
 	{
 		@Override
 		public Syntax getSyntax()
 		{
-			return Syntax.commandSyntax
-			    ( new int[] { Syntax.StringType() , Syntax.NumberType() } ) ;
-		}
-		@Override
-		public String getAgentClassString()
-		{
-			return "OTPL" ;
+			return SyntaxJ.commandSyntax
+			    ( new int[] { Syntax.StringType() , Syntax.NumberType() }, "OTPL" ) ;
 		}
 		
 		public void perform( Argument args[] , Context context ) 
@@ -842,18 +807,13 @@ public class RayTracingExtension extends DefaultClassManager {
 		}					      
     }
 
-    public static class StartMovie extends DefaultCommand
+    public static class StartMovie implements org.nlogo.api.Command
 	{
 		@Override
 		public Syntax getSyntax()
 		{
-			return Syntax.commandSyntax
-			    ( new int[] { Syntax.StringType() , Syntax.NumberType() } ) ;
-		}
-		@Override
-		public String getAgentClassString()
-		{
-			return "OTPL" ;
+			return SyntaxJ.commandSyntax
+			    ( new int[] { Syntax.StringType() , Syntax.NumberType() }, "OTPL" ) ;
 		}
 		
 		public void perform( Argument args[] , Context context ) 
@@ -865,18 +825,12 @@ public class RayTracingExtension extends DefaultClassManager {
 		}					      
     }
 
-    public static class RenderNextMovieFrame extends DefaultCommand
+    public static class RenderNextMovieFrame implements org.nlogo.api.Command
 	{
 		@Override
 		public Syntax getSyntax()
 		{
-			return Syntax.commandSyntax
-			    ( new int[] { } ) ;
-		}
-		@Override
-		public String getAgentClassString()
-		{
-			return "OTPL" ;
+			return SyntaxJ.commandSyntax(new int[] {}, "OTPL");
 		}
 		
 		public void perform( Argument args[] , Context context ) 
@@ -892,20 +846,14 @@ public class RayTracingExtension extends DefaultClassManager {
 		}					      
     }
 
-    public static class AddLight extends DefaultCommand
+    public static class AddLight implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.NumberType(), Syntax.NumberType(), Syntax.NumberType(),
-                                                   Syntax.ReadableType()});
+            return SyntaxJ.commandSyntax(new int[] {Syntax.NumberType(), Syntax.NumberType(), Syntax.NumberType(),
+                                                   Syntax.ReadableType()}, "OTPL");
         }
-
-        @Override
-		public String getAgentClassString()
-		{
-			return "OTPL" ;
-		}
 
         public void perform( Argument args[] , Context context )
 				throws ExtensionException, LogoException
@@ -934,19 +882,13 @@ public class RayTracingExtension extends DefaultClassManager {
 
     }
 
-    public static class ClearLights extends DefaultCommand
+    public static class ClearLights implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {});
+            return SyntaxJ.commandSyntax(new int[] {}, "OTPL");
         }
-
-        @Override
-		public String getAgentClassString()
-		{
-			return "OTPL" ;
-		}
 
         public void perform( Argument args[] , Context context )
 				throws ExtensionException, LogoException
@@ -955,19 +897,13 @@ public class RayTracingExtension extends DefaultClassManager {
         }
     }
 
-    public static class ClearAll extends DefaultCommand
+    public static class ClearAll implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {});
+            return SyntaxJ.commandSyntax(new int[] {}, "OTPL");
         }
-
-        @Override
-		public String getAgentClassString()
-		{
-			return "OTPL" ;
-		}
 
         public void perform( Argument args[] , Context context )
 				throws ExtensionException, LogoException
@@ -976,19 +912,13 @@ public class RayTracingExtension extends DefaultClassManager {
         }
     }
 
-    public static class SetRefraction extends DefaultCommand
+    public static class SetRefraction implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.NumberType()});
+            return SyntaxJ.commandSyntax(new int[] {Syntax.NumberType()}, "-TPL");
         }
-
-        @Override
-		public String getAgentClassString()
-		{
-			return "TPL" ;
-		}
 
         public void perform( Argument args[] , Context context )
 				throws ExtensionException, LogoException
@@ -1000,19 +930,13 @@ public class RayTracingExtension extends DefaultClassManager {
         }
     }
 
-    public static class SetReflection extends DefaultCommand
+    public static class SetReflection implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.NumberType()});
+            return SyntaxJ.commandSyntax(new int[] {Syntax.NumberType()}, "-TPL");
         }
-
-        @Override
-		public String getAgentClassString()
-		{
-			return "TPL" ;
-		}
 
         public void perform( Argument args[] , Context context )
 				throws ExtensionException, LogoException
@@ -1024,19 +948,13 @@ public class RayTracingExtension extends DefaultClassManager {
         }
     }
 
-    public static class SetHighlight extends DefaultCommand
+    public static class SetHighlight implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.NumberType(), Syntax.NumberType()});
+            return SyntaxJ.commandSyntax(new int[] {Syntax.NumberType(), Syntax.NumberType()}, "-TPL");
         }
-
-        @Override
-		public String getAgentClassString()
-		{
-			return "TPL" ;
-		}
 
         public void perform( Argument args[] , Context context )
 				throws ExtensionException, LogoException
@@ -1046,22 +964,15 @@ public class RayTracingExtension extends DefaultClassManager {
             Double highlightSize = args[1].getDoubleValue();
             highlightMap.put(curAgent, highlightAmt);
             highlightSizeMap.put(curAgent, highlightSize);
-
         }
     }
 
-    public static class SetTexture extends DefaultCommand
+    public static class SetTexture implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[]{Syntax.StringType(), Syntax.NumberType()});
-        }
-
-        @Override
-        public String getAgentClassString()
-        {
-            return "TPL";
+            return SyntaxJ.commandSyntax(new int[]{Syntax.StringType(), Syntax.NumberType()}, "-TPL");
         }
 
         public void perform(Argument args[], Context context)
@@ -1075,18 +986,12 @@ public class RayTracingExtension extends DefaultClassManager {
         }
     }
 
-    public static class OutputResolution extends DefaultCommand
+    public static class OutputResolution implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[]{Syntax.NumberType(), Syntax.NumberType()});
-        }
-
-        @Override
-        public String getAgentClassString()
-        {
-            return "O";
+            return SyntaxJ.commandSyntax(new int[]{Syntax.NumberType(), Syntax.NumberType()}, "OTPL");
         }
 
         public void perform(Argument args[], Context context)
@@ -1097,18 +1002,12 @@ public class RayTracingExtension extends DefaultClassManager {
         }        
     }
 
-    public static class SetBackground extends DefaultCommand
+    public static class SetBackground implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[]{Syntax.ReadableType()});
-        }
-
-        @Override
-        public String getAgentClassString()
-        {
-            return "O";
+            return SyntaxJ.commandSyntax(new int[]{Syntax.ReadableType()}, "OTPL");
         }
 
         public void perform(Argument args[], Context context)
@@ -1125,18 +1024,12 @@ public class RayTracingExtension extends DefaultClassManager {
         }
     }
 
-    public static class MatchWindow extends DefaultCommand
+    public static class MatchWindow implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {});
-        }
-
-        @Override
-        public String getAgentClassString()
-        {
-            return "O";
+            return SyntaxJ.commandSyntax(new int[] {}, "OTPL");
         }
 
         public void perform(Argument args[], Context context)
@@ -1150,19 +1043,13 @@ public class RayTracingExtension extends DefaultClassManager {
         }
     }
 
-    public static class OutputAntiAliasing extends DefaultCommand
+    public static class OutputAntiAliasing implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.NumberType()});
+            return SyntaxJ.commandSyntax(new int[] {Syntax.NumberType()}, "OTPL");
 
-        }
-
-        @Override
-        public String getAgentClassString()
-        {
-            return "O";
         }
 
         public void perform(Argument args[], Context context)
@@ -1173,19 +1060,12 @@ public class RayTracingExtension extends DefaultClassManager {
         }
     }
 
-    public static class SetBackgroundImage extends DefaultCommand
+    public static class SetBackgroundImage implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.StringType()});
-        }
-
-        @Override
-        public String getAgentClassString()
-        {
-            return "O";
-
+            return SyntaxJ.commandSyntax(new int[] {Syntax.StringType()}, "OTPL");
         }
 
         public void perform(Argument args[], Context context)
@@ -1195,18 +1075,12 @@ public class RayTracingExtension extends DefaultClassManager {
         }
     }
 
-    public static class SetImage extends DefaultCommand
+    public static class SetImage implements org.nlogo.api.Command
     {
         @Override
         public Syntax getSyntax()
         {
-            return Syntax.commandSyntax(new int[] {Syntax.StringType()});
-        }
-
-        @Override
-        public String getAgentClassString()
-        {
-            return "TPL";
+            return SyntaxJ.commandSyntax(new int[] {Syntax.StringType()}, "-TPL");
         }
 
         public void perform(Argument args[], Context context)

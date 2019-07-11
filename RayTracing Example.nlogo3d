@@ -1,11 +1,11 @@
 extensions [raytracing]
 
- 
+
 to setup-scene1
   clear-all
   raytracing:clear-lights
   raytracing:add-light 0 0 10 white
-  create-turtles 1 [ 
+  create-turtles 1 [
     set shape "circle"
     set heading 0
     set color [255 0 0 128] ; partially transparent red
@@ -17,17 +17,17 @@ to setup-scene1
     set heading 0
     set color yellow
     setxyz 2 0 0
-    set size 4 
+    set size 4
     raytracing:set-highlight 0.4 50  ; shiny (specular highlight from light source)
-  ]       
-     
+  ]
+
   ask patches with [pzcor = min-pzcor ]
   [
     ifelse (pxcor + pycor) mod 2 = 0
       [ set pcolor blue ]
       [ set pcolor gray ]
   ]
-  
+
 end
 
 
@@ -36,7 +36,7 @@ to setup-scene2
   raytracing:clear-lights
   raytracing:add-light -5 -5 15 white
   raytracing:add-light 5 5 15 blue
-  create-turtles 1 [ 
+  create-turtles 1 [
     set shape "car"
     set heading 0
     set color red
@@ -50,23 +50,23 @@ to setup-scene2
     set color yellow
     setxyz 1 0 0
     raytracing:set-highlight 0.5 20
-  ]        
+  ]
   create-turtles 1 [
     set shape "cylinder"
     set heading 0
     set color [255 0 255 128]
     setxyz 0 1 0
     raytracing:set-highlight 0.2 80
-  ]       
+  ]
   create-turtles 1 [
     set shape "square"
     set heading 0
     set color green
     setxyz 1 1 0
     raytracing:set-texture "T_Stone34" 1.5
-  ]       
+  ]
   raytracing:set-background-image "samplesky.jpg"
-  
+
   ask patches with [pzcor = min-pzcor ]
   [
     ifelse (pxcor + pycor) mod 2 = 0
@@ -75,7 +75,7 @@ to setup-scene2
     ;set palpha 255
     raytracing:set-reflection 0.3
     raytracing:set-highlight 0.3 40
-  ]    
+  ]
   zoom 55
   orbit-left 30
   orbit-down 20
@@ -98,17 +98,17 @@ to setup-scene3
     ifelse (pxcor + pycor) mod 2 = 0
       [ set pcolor yellow + 1 ]
       [ set pcolor gray + 1 ]
-  ]    
-  
+  ]
+
   raytracing:add-light 40 40 40 white
   raytracing:add-light -40 -40 40 white
   zoom 45
   orbit-left 35
   orbit-down 50
-end      
- 
+end
+
 to setup-scene4
-  clear-all  
+  clear-all
   raytracing:clear-lights
   crt 4 [
    set heading 0
@@ -121,14 +121,14 @@ to setup-scene4
    raytracing:set-image "gabby.jpg"
    raytracing:set-highlight 0.2 40
    raytracing:set-reflection 0.1
-  ] 
+  ]
   zoom 55
   orbit-right 90
   orbit-down 60
 end
- 
+
 to setup-scene5
-  clear-all  
+  clear-all
   raytracing:clear-lights
   create-turtles 20 [
     tilt-up random 90
@@ -143,9 +143,9 @@ to setup-scene5
     ]
   ]
   zoom 25
-  
 
-  
+
+
 end
 
 to render
@@ -169,9 +169,9 @@ to make-movie
      raytracing:render-next-movie-frame
   ]
   ;; NOTE 2: All the extension does is create the movie frames for you --
-  ;;   You're on your own to turn those frames into a movie.  
+  ;;   You're on your own to turn those frames into a movie.
   ;;  I recommend using the free open source FFMPEG tool for this task.
-      
+
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -179,8 +179,8 @@ GRAPHICS-WINDOW
 0
 439
 460
-16
-16
+-1
+-1
 13.0
 1
 10
@@ -649,9 +649,8 @@ false
 0
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
-
 @#$#@#$#@
-NetLogo 3D 5.2.0
+NetLogo 3D 6.1.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -667,7 +666,6 @@ true
 0
 Line -7500403 true 150 150 90 180
 Line -7500403 true 150 150 210 180
-
 @#$#@#$#@
 1
 @#$#@#$#@
