@@ -93,13 +93,19 @@ GENERAL TIP: Save your model before rendering, just in case -- to prevent lost w
         "raytracing:add-light">raytracing:add-light</a>
       </h3>
       <h4>
-        raytracing:add-light <i>xcor</i> <i>ycor</i> <i>zcor</i> <i>color</i>
+        raytracing:add-light <i>xcor</i> <i>ycor</i> <i>zcor</i> <i>color</i> <i>brightness-factor</i>
       </h4>
       <p>
-        Add a new light to the scene with specified coordinate and color, which can be either Netlogo or RGB color.
-        If you don't add any lights to the scene, the scene will still be illuminated by 
-        a combination of low ambient light, as well as a "headlamp" placed by the camera location.
-        (The headlamp is only used if you haven't added any lights to the scene.)
+        Add a new light to the scene at the specified location and color (Netlogo color number or RGB color) and brightness-factor (1.0 is a good default brightness, 0.5 would make it half as bright, and 2.0 twice as bright).
+        </p>
+        <p>Notes:
+        <ol>
+         <li>The coordinates can be outside of the NetLogo 3d world bounding box.</li>
+         <li> If you don't add any lights to the scene, the scene will still be illuminated by 
+        a combination of low ambient light, as well as a &ldquo;headlamp&rdquo; placed by the camera location.
+        (The default headlamp light is only included in the scene if you don't add any lights yourself.)</li>
+        <li>Making the light too bright can cause your scene to be <i>over-exposed</i> or washed out to white</li>
+        </ol>
       </div>
     <div class="dict_entry">
       <h3>

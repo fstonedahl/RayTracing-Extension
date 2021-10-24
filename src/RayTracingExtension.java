@@ -860,7 +860,7 @@ public class RayTracingExtension extends DefaultClassManager {
         public Syntax getSyntax()
         {
             return SyntaxJ.commandSyntax(new int[] {Syntax.NumberType(), Syntax.NumberType(), Syntax.NumberType(),
-                                                   Syntax.ReadableType()}, "OTPL");
+                                                   (Syntax.NumberType() | Syntax.ListType()), Syntax.NumberType()}, "OTPL");
         }
 
         public void perform( Argument args[] , Context context )
@@ -870,12 +870,13 @@ public class RayTracingExtension extends DefaultClassManager {
           Double yCor   = args[ 1 ].getDoubleValue() ;
           Double zCor   = args[ 2 ].getDoubleValue() ;
           Object color  = args[ 3 ].get();
+	  Double brightnessFactor = args[ 4 ].getDoubleValue();
 
           java.awt.Color javaColor = org.nlogo.api.Color.getColor(color);
           int javaColorRGB = javaColor.getRGB();
-          double blue = (javaColorRGB & 0xff) / 255.0;
-          double green = ((javaColorRGB >> 8) & 0xff) / 255.0;
-          double red = ((javaColorRGB >> 16) & 0xff) / 255.0;
+          double blue = (javaColorRGB & 0xff) / 255.0 * brightnessFactor;
+          double green = ((javaColorRGB >> 8) & 0xff) / 255.0 * brightnessFactor;
+          double red = ((javaColorRGB >> 16) & 0xff) / 255.0 * brightnessFactor;
 
 
           ArrayList<Double> newLight = new ArrayList<Double>();
@@ -1015,7 +1016,7 @@ public class RayTracingExtension extends DefaultClassManager {
         @Override
         public Syntax getSyntax()
         {
-            return SyntaxJ.commandSyntax(new int[]{Syntax.ReadableType()}, "OTPL");
+            return SyntaxJ.commandSyntax(new int[]{Syntax.NumberType() | Syntax.ListType()}, "OTPL");
         }
 
         public void perform(Argument args[], Context context)
