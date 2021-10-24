@@ -75,6 +75,7 @@ import scala.io.Codec;
 public class RayTracingExtension extends DefaultClassManager {
 	
 	private static String POVRAY_EXE = "povray";
+	private static String POVRAY_OPTIONS = "";
 	private static String builtInShapesText = "";
 
 	private static File extensionDirectory;    
@@ -127,6 +128,7 @@ public class RayTracingExtension extends DefaultClassManager {
 		movieQuality = 0;
 	}
 
+	@Override
     public void runOnce(org.nlogo.api.ExtensionManager em) throws ExtensionException
     {
     	try {
@@ -147,8 +149,9 @@ public class RayTracingExtension extends DefaultClassManager {
 			String wholeFile = FileIO.fileToString(new File(extensionDirectory, "raytracing.config.txt"), Codec.defaultCharsetCodec());
 			java.util.Properties props = new java.util.Properties();
 			props.load(new java.io.StringReader(wholeFile));
-			POVRAY_EXE = props.getProperty("povray_executable", "povray"); 
+			POVRAY_EXE = props.getProperty("povray_executable", "povray").trim(); 
 			POVRAY_EXE = POVRAY_EXE.replace("\"", ""); // remove quotes inside the path, if there were any... 
+			POVRAY_OPTIONS = props.getProperty("povray_options", "").trim(); 
 		} catch (IOException ex)
 		{
 			throw new ExtensionException("Failed to load config file: raytracing/raytracing.config.txt");
@@ -430,10 +433,11 @@ public class RayTracingExtension extends DefaultClassManager {
 			{
 				sb.append("object {MyCone\n");
 			}
-			else 
+			else if (t.shape().startsWith("pov"))
 			{
 				sb.append("object {" + t.shape() + "\n");
-			}
+			} // TODO: instead, throw error if shape is not supported
+			// (How can we tell?  by parsing the shapes.txt file?  something else?)
 
 			addFeatures(t, sb, red, green, blue, roll, pitch, heading,t.shape());
 
@@ -468,8 +472,9 @@ public class RayTracingExtension extends DefaultClassManager {
 		double green = ((linkColorRGB >> 8) & 0xff) / 255.0;
 		double red = ((linkColorRGB >> 16) & 0xff) / 255.0;
 		
-		// TODO: allow user to specify trail width using a primitive.
-		// For now, fudge to usually get decent width of trail (since NetLogo 3D doesn't record/display trail width)
+		// TODO: instead of this fudge, figure out how line.width() relates to 
+		//       how thick the line should be portrayed in the world...
+		//        try a radius of:  line.width() / 8
 		double thickness = (world.worldWidth() + world.worldHeight() + world.worldDepth()) / 500.0;   
 
 		sb.append("cylinder{\n")
@@ -564,7 +569,7 @@ public class RayTracingExtension extends DefaultClassManager {
 
 			String filePath;
 
-			String temp2 = workspace.getModelPath();
+			String modelPath = workspace.getModelPath();
 
 			if(new java.io.File( outputFileName ).isAbsolute())
 			{
@@ -572,13 +577,13 @@ public class RayTracingExtension extends DefaultClassManager {
 			}
 			else
 			{
-				if(temp2 == null)
+				if(modelPath == null)
 				{
 				  filePath = System.getProperty( "user.home" ) + java.io.File.separator + outputFileName;
 				}
 				else
 				{
-					File temp = new File(temp2);
+					File temp = new File(modelPath);
 					filePath = temp.getParent() + java.io.File.separator + outputFileName;
 				}
 			}
@@ -700,6 +705,9 @@ public class RayTracingExtension extends DefaultClassManager {
 			List<String> cmdArgs = new ArrayList<String>();
 
 			cmdArgs.add(POVRAY_EXE);
+			for (String option : POVRAY_OPTIONS.split("\\s+")) {
+				cmdArgs.add(option);
+			}
 			if (quietly)
 			{
 				cmdArgs.add("-D");

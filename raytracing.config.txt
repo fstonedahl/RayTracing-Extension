@@ -8,5 +8,6 @@
 #
 # * On Linux, you can likely just set it to "povray"
 povray_executable=povray
+#povray_options=-D
 
 #Right now, there aren't any other options to set...
