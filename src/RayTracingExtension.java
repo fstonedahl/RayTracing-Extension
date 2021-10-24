@@ -596,7 +596,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			BufferedWriter out = new BufferedWriter( new FileWriter( temp ) ) ;
 
 			StringBuilder sb = new StringBuilder();
-			sb.append( "#version 3.6;\n");  //TODO: #update version to 3.6 or 3.7 sometime?
+			sb.append( "#version 3.7;\n");  //TODO: #update version to 3.6 or 3.7 sometime?
 			
 			File customIncludeFile = new File(temp.getParent() + "/custom.inc");
 			if (customIncludeFile.exists()) {
@@ -781,12 +781,12 @@ public class RayTracingExtension extends DefaultClassManager {
 			{
 				System.err.println(line);
 				// if povray reports an error (hopefully it always uses the word "error"!)
-				if (line.toLowerCase().indexOf("error") > -1)
+				if (line.toLowerCase().indexOf("error") > -1 && line.toLowerCase().indexOf("possible parse error") == -1)
 				{
 					errorText += line + "\n";
 				}
 			}
-			if (errorText.toLowerCase().indexOf("error") > -1)
+			if (errorText.length() > 0)
 			{
 				javax.swing.JOptionPane.showMessageDialog(null, errorText, "Error runinng POV-Ray", javax.swing.JOptionPane.ERROR_MESSAGE); 
 			}

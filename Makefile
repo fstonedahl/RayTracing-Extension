@@ -3,7 +3,7 @@ ifeq ($(origin JAVA_HOME), undefined)
 endif
 
 #ifeq ($(origin NETLOGO), undefined)
-NETLOGO="/home/forrest/apps/NetLogo\ 6.1.0"
+NETLOGO="/home/forrest/apps/NetLogo\ 6.2.0"
 #endif
 
 #ifeq ($(origin SCALA_JAR), undefined)
@@ -13,9 +13,9 @@ NETLOGO="/home/forrest/apps/NetLogo\ 6.1.0"
 SRCS=$(wildcard src/*.java)
 
 raytracing.jar: $(SRCS) manifest.txt
-	echo "$(NETLOGO)/app/netlogo-6.1.0.jar"
+	echo "$(NETLOGO)/app/netlogo-6.2.0.jar"
 	mkdir -p classes
-	$(JAVA_HOME)/bin/javac -source 1.8 -target 1.8 -classpath "$(NETLOGO)/app/netlogo-6.1.0.jar" -d classes $(SRCS)
+	$(JAVA_HOME)/bin/javac -source 1.8 -target 1.8 -classpath "$(NETLOGO)/app/netlogo-6.2.0.jar" -d classes $(SRCS)
 	jar cvfm raytracing.jar manifest.txt -C classes .
 
 raytracing.zip: raytracing.jar README.md raytracing.html raytracing.config.txt shapes.txt RayTracing\ Example.nlogo3d 
