@@ -4,7 +4,7 @@ extensions [raytracing]
 to setup-scene1
   clear-all
   raytracing:clear-lights
-  raytracing:add-light 0 0 10 white
+  raytracing:add-light 0 0 10 white 1.0
   create-turtles 1 [
     set shape "circle"
     set heading 0
@@ -34,8 +34,8 @@ end
 to setup-scene2
   clear-all
   raytracing:clear-lights
-  raytracing:add-light -5 -5 15 white
-  raytracing:add-light 5 5 15 blue
+  raytracing:add-light -5 -5 15 white 1.0
+  raytracing:add-light 5 5 15 blue 1.0
   create-turtles 1 [
     set shape "car"
     set heading 0
@@ -100,8 +100,8 @@ to setup-scene3
       [ set pcolor gray + 1 ]
   ]
 
-  raytracing:add-light 40 40 40 white
-  raytracing:add-light -40 -40 40 white
+  raytracing:add-light 40 40 40 white 1.0
+  raytracing:add-light -40 -40 40 white 1.0
   zoom 45
   orbit-left 35
   orbit-down 50
@@ -154,10 +154,10 @@ to render
 end
 
 to make-movie
-  raytracing:output-resolution 300 200
-  ;; NOTE: If you're creating a bunch of movie frames, it's usually better
-  ;; to put them in a subfolder, so create a subfolder called "frames"
-  ;; and change the line below to:
+  raytracing:output-resolution 640 360 ; "360p" for YouTube, etc.
+  ;; NOTE: If you want to dump all your movie frames into a subfolder,
+  ;; so create a subfolder called "frames", copy any needed source images or
+  ;;  background images into that folder, and change the line below to:
   ;;   raytracing:start-movie "frames/movietest" 10
   raytracing:start-movie "movietest" 10
 
@@ -650,10 +650,19 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 3D 6.1.0
+NetLogo 3D 6.2.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="runmovie" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup-scene1
+orbit-down 45
+zoom 15
+make-movie</setup>
+    <timeLimit steps="1"/>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default

@@ -596,7 +596,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			BufferedWriter out = new BufferedWriter( new FileWriter( temp ) ) ;
 
 			StringBuilder sb = new StringBuilder();
-			sb.append( "#version 3.7;\n");  //TODO: #update version to 3.6 or 3.7 sometime?
+			sb.append( "#version 3.7;\n");
 			
 			File customIncludeFile = new File(temp.getParent() + "/custom.inc");
 			if (customIncludeFile.exists()) {
