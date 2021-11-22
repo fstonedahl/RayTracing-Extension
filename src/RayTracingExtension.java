@@ -838,7 +838,7 @@ public class RayTracingExtension extends DefaultClassManager {
 		@Override
 		public Syntax getSyntax()
 		{
-			return SyntaxJ.commandSyntax(new int[] {}, "OTPL");
+			return SyntaxJ.commandSyntax(new int[] {Syntax.NumberType() | Syntax.RepeatableType()}, 0);
 		}
 		
 		public void perform( Argument args[] , Context context ) 
@@ -847,6 +847,9 @@ public class RayTracingExtension extends DefaultClassManager {
 			if (movieFileName == null)
 			{
 				throw new ExtensionException("You must call RAYTRACING:MOVIE-START first!");
+			}
+			if (args.length == 1) {
+			   movieFrame = args[0].getIntValue();
 			}
 			//TODO: Provide "repeat frame count" as input, to copy the frame multiple times?
 			render(String.format(Locale.US, "%s_%05d", movieFileName, movieFrame), movieQuality, true, true, (ExtensionContext) context);

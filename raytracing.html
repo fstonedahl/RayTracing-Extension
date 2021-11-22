@@ -262,10 +262,11 @@ GENERAL TIP: Save your model before rendering, just in case -- to prevent lost w
         <a name="raytracing:render-next-movie-frame" id="raytracing:render-next-movie-frame">raytracing:render-next-movie-frame</a>
       </h3>
       <h4>
-        raytracing:render-next-movie-frame
+        raytracing:render-next-movie-frame <i>[optional-frame-number]</i>
       </h4>
-      <p> Similar to RENDER above, except that it creates sequentially numbered image files, based on the movie-file-name-stem and quality-level given to the START-MOVIE command.
-      Also, it renders all the images quietly in the background (at least on Linux) to prevent POV-Ray windows from popping up over and over again.
+      <p> Similar to RENDER above, except that it creates sequentially numbered image files, using the movie-file-name-stem and quality-level given to the START-MOVIE command.
+      By default, it uses consecutive frame numbers starting at zero, but if you provide the <i>optional-frame-number</i> input, it will use that instead. 
+      (You can use this functionality, e.g. by providing <code>ticks</code> as the frame number, to just render part of a scene/movie, or render frames out of order.)
       </div>
  
     <h2>
