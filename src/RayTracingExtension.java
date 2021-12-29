@@ -372,9 +372,9 @@ public class RayTracingExtension extends DefaultClassManager {
 		sb.append("}\n}\n");
 		
 		// now handle geometric transformations...
-		sb.append(String.format(Locale.US, "rotate <0, %f, 0>\n", -roll));
-		sb.append(String.format(Locale.US, "rotate <%f, 0, 0>\n", -pitch));
-		sb.append(String.format(Locale.US, "rotate <0, 0, %f>\n", -heading));
+		if (roll != 0.0) { sb.append(String.format(Locale.US, "rotate <0, %f, 0>\n", -roll)); }
+		if (pitch != 0.0) { sb.append(String.format(Locale.US, "rotate <%f, 0, 0>\n", -pitch)); }
+		if (heading != 0.0) { sb.append(String.format(Locale.US, "rotate <0, 0, %f>\n", -heading)); }
 
 		if( agent instanceof Turtle )
 			{
