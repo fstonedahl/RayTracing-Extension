@@ -69,9 +69,6 @@ import java.util.*;
 
 import org.nlogo.nvm.ExtensionContext;
 
-import scala.io.Codec;
-
-
 public class RayTracingExtension extends DefaultClassManager {
 	
 	private static String POVRAY_EXE = "povray";
@@ -139,14 +136,14 @@ public class RayTracingExtension extends DefaultClassManager {
     	
 		try {
 			
-			builtInShapesText = FileIO.fileToString(new File(extensionDirectory, "shapes.txt"), Codec.defaultCharsetCodec());
+			builtInShapesText = FileIO.fileToString(new File(extensionDirectory, "shapes.txt"));
 		} catch (IOException ex)
 		{
 			ex.printStackTrace();
 			throw new ExtensionException("Failed to load shapes file: raytracing/shapes.txt");
 		}
 		try {
-			String wholeFile = FileIO.fileToString(new File(extensionDirectory, "raytracing.config.txt"), Codec.defaultCharsetCodec());
+			String wholeFile = FileIO.fileToString(new File(extensionDirectory, "raytracing.config.txt"));
 			java.util.Properties props = new java.util.Properties();
 			props.load(new java.io.StringReader(wholeFile));
 			POVRAY_EXE = props.getProperty("povray_executable", "povray").trim(); 
@@ -260,7 +257,7 @@ public class RayTracingExtension extends DefaultClassManager {
 		if (col instanceof LogoList)
 		{
 			LogoList lst = (LogoList) col;
-			if (lst.size() == 4)
+			if (lst.length() == 4)
 			{
 				return ((Double) lst.get(3));
 			}
@@ -499,7 +496,7 @@ public class RayTracingExtension extends DefaultClassManager {
 					world.observer().oxcor() , world.observer().oycor() , world.observer().ozcor() ) ;
 		*/
 		   // org.nlogo.agent.Protractor3D protractor3D = world3d.protractor3D() ;
-			ObserverOrientation cameraOrientation = world.observer().orientation().get();
+			ObserverOrientation cameraOrientation = (ObserverOrientation) world.observer().orientation().get();
 
 			double pitchRadians = StrictMath.toRadians( cameraOrientation.pitch() ) ;
 			double sin = StrictMath.sin( pitchRadians ) ;
