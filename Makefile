@@ -18,11 +18,11 @@ raytracing.jar: $(SRCS) manifest.txt
 	$(JAVA_HOME)/bin/javac -source 1.8 -target 1.8 -classpath "$(NETLOGO)/lib/app/netlogo-7.0.3.jar" -d classes $(SRCS)
 	jar cvfm raytracing.jar manifest.txt -C classes .
 
-raytracing.zip: raytracing.jar README.md raytracing.html raytracing.config.txt shapes.txt RayTracing\ Example.nlogo3d 
+raytracing.zip: raytracing.jar README.md raytracing.html raytracing.config.txt shapes.txt RayTracing\ Example.nlogox3d 
 	rm -rf raytracing
 	mkdir raytracing
 	cp -rp raytracing.jar README.md Makefile src manifest.txt raytracing.html raytracing.config.txt shapes.txt raytracing
-	zip -rv raytracing.zip raytracing RayTracing\ Example.nlogo3d gabby.jpg samplesky.jpg
+	zip -rv raytracing.zip raytracing RayTracing\ Example.nlogox3d gabby.jpg samplesky.jpg
 	#rm -rf raytracing
 
 clean:

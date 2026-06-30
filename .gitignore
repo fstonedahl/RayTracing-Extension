@@ -2,4 +2,9 @@ classes/
 raytracing.jar
 raytracing.zip
 raytracing/
+frames/
+test.png
+test.pov
+movietest*.png
+movietest*.pov
 *~
