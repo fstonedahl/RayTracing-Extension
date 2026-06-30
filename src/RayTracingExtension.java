@@ -69,8 +69,11 @@ import java.util.*;
 
 import org.nlogo.nvm.ExtensionContext;
 
+import javax.swing.*;
+
 public class RayTracingExtension extends DefaultClassManager {
 	
+	private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().startsWith("win");
 	private static String POVRAY_EXE = "povray";
 	private static String POVRAY_OPTIONS = "";
 	private static String builtInShapesText = "";
@@ -148,7 +151,13 @@ public class RayTracingExtension extends DefaultClassManager {
 			props.load(new java.io.StringReader(wholeFile));
 			POVRAY_EXE = props.getProperty("povray_executable", "povray").trim(); 
 			POVRAY_EXE = POVRAY_EXE.replace("\"", ""); // remove quotes inside the path, if there were any... 
-			POVRAY_OPTIONS = props.getProperty("povray_options", "").trim(); 
+			POVRAY_OPTIONS = props.getProperty("povray_options", "").trim();
+
+			if (IS_WINDOWS && POVRAY_EXE.equals("povray")) {
+				// if someone doesn't set the povray executable path in their config file
+				// let's assume they installed it in the default Windows location
+				POVRAY_EXE = "C:/Program Files/POV-Ray/v3.7/bin/pvengine64.exe";
+			}
 		} catch (IOException ex)
 		{
 			throw new ExtensionException("Failed to load config file: raytracing/raytracing.config.txt");
@@ -701,7 +710,6 @@ public class RayTracingExtension extends DefaultClassManager {
 
 			List<String> cmdArgs = new ArrayList<String>();
 
-			cmdArgs.add(POVRAY_EXE);
 			for (String option : POVRAY_OPTIONS.split("\\s+")) {
 				cmdArgs.add(option);
 			}
@@ -716,7 +724,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			{
 				cmdArgs.add("+Q"+quality);
 			}
-			else if(quality == 10)
+			else if (quality == 10)
 			{
 				cmdArgs.add("+Q9");
 				cmdArgs.add("+A"+anti_aliasing);
@@ -737,24 +745,33 @@ public class RayTracingExtension extends DefaultClassManager {
 			}
 			
 			ProcessBuilder povrayProcessBuilder;
-			if (POVRAY_EXE.indexOf("pvengine") > -1)  // WINDOWS
+			if (IS_WINDOWS)  // WINDOWS
 			{
-				cmdArgs.add("+I'" + temp.getAbsolutePath() + "'");
-				cmdArgs.add("+O'" + filePath + ".png" + "'");
+				cmdArgs.add(0,"\"" + POVRAY_EXE + "\"");
+				cmdArgs.add("+I\"" + temp.getAbsolutePath() + "\"");
+				cmdArgs.add("+O\"" + filePath + ".png" + "\"");
 				cmdArgs.add("/EXIT");
 				//NOTE: Instead of /EXIT, we could pass the windows-only
 				// command line args:  /RENDER xxx.pov /EDIT xxx.pov
 				// which might allow the user to leave POVRAY open, and make
 				// it easier for them to hand edit the files...
-				// also, we used to be using cmd /c to start it, but I don't know why, and it seems to work without that now...
-				//povrayProcessBuilder = new ProcessBuilder("cmd","/C", joinStrings(cmdArgs," ")) ;
+
+				// Because of some strange issues with command line parsing with POVRAY on Windows,
+				// (which I do not fully understand)
+				// it seems best (necessary?) to use cmd /c to start it
+				String combinedArgs = "\"" + String.join(" ", cmdArgs) + "\"";
+				cmdArgs.clear();
+				cmdArgs.add("CMD.EXE");
+				cmdArgs.add("/C");
+				cmdArgs.add(combinedArgs);
+				//JOptionPane.showMessageDialog(null, cmdArgs.toString(), "DEBUG args:", JOptionPane.INFORMATION_MESSAGE);
 			}
 			else
 			{
+				cmdArgs.add(0,POVRAY_EXE);
 				cmdArgs.add("-V"); // less verbose
-				cmdArgs.add("+I'" + temp.getPath() +"'");
-				cmdArgs.add("+O'" + filePath + ".png'");
-				
+				cmdArgs.add("+I" + temp.getPath());
+				cmdArgs.add("+O" + filePath + ".png");
 				//cmdArgs.add("+P"); // pause?
 			}
 			povrayProcessBuilder = new ProcessBuilder(cmdArgs) ;
@@ -773,10 +790,12 @@ public class RayTracingExtension extends DefaultClassManager {
 			// and this can cause the povray subprocess to hang/deadlock.
 			java.io.BufferedReader povrayOutputReader = new java.io.BufferedReader(new java.io.InputStreamReader(process.getInputStream()));
 			String errorText = "";
+			String debugText = "";
 			String line;
 			while ((line = povrayOutputReader.readLine()) != null)
 			{
 				System.err.println(line);
+				debugText += line + "\n";
 				// if povray reports an error (hopefully it always uses the word "error"!)
 				if (line.toLowerCase().indexOf("error") > -1 && line.toLowerCase().indexOf("possible parse error") == -1)
 				{
@@ -787,6 +806,7 @@ public class RayTracingExtension extends DefaultClassManager {
 			{
 				javax.swing.JOptionPane.showMessageDialog(null, errorText, "Error runinng POV-Ray", javax.swing.JOptionPane.ERROR_MESSAGE); 
 			}
+			//JOptionPane.showMessageDialog(null, debugText, "DEBUG: cmd output", JOptionPane.INFORMATION_MESSAGE);
 		}
 		catch( IOException ex )
 		{ 
